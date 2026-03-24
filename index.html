@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Birds of Yorba Linda — Wildlife Guide</title>
+<meta name="description" content="An educational guide to birds and wildlife in Yorba Linda, California. Discover over 40 bird species, local parks, and wildlife in the Chino Hills area.">
+
+<!-- Fonts -->
+<link href="https://api.fontshare.com/v2/css?f[]=zodiak@400,500,600,700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="./base.css">
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+<!-- Skip Link -->
+<a href="#main-content" class="skip-link">Skip to content</a>
+
+<!-- Header -->
+<header class="site-header" role="banner">
+  <div class="header-inner">
+    <a href="#home" class="site-logo" aria-label="Birds of Yorba Linda — Home">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <path d="M6 22c2-5 6-10 12-12 2-0.7 4-0.5 5.5 0.5 1.5 1 1.5 3 0 4.5C22 16.5 19 18 16 19c-2 0.7-4 2-5 4l-1 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M24.5 11c1-0.5 2.5-0.5 3.5 0.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="22" cy="12" r="1" fill="currentColor"/>
+        <path d="M6 22c-1 1-2 3-2.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <path d="M8 24c-1 0.5-2 1.5-2.5 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span>Birds of Yorba Linda</span>
+    </a>
+
+    <nav class="nav-main" id="nav-main" aria-label="Main navigation">
+      <a href="#birds">Birds</a>
+      <a href="#wildlife">Wildlife</a>
+      <a href="#parks">Parks</a>
+      <a href="#rare">Rare</a>
+      <a href="#learn">Learn</a>
+      <a href="#quiz">Quiz</a>
+      <a href="#about">About</a>
+    </nav>
+
+    <div class="header-controls">
+
+      <button class="toggle-btn" id="theme-toggle" data-theme-toggle aria-label="Switch to dark mode" onclick="toggleTheme()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+
+      <button class="toggle-btn" aria-label="Search" onclick="navigate('search')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </button>
+
+      <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Open menu" onclick="toggleMobileMenu()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Main Content -->
+<main id="main-content" class="site-main" role="main">
+  <!-- Content rendered by app.js -->
+</main>
+
+<!-- Footer -->
+<footer class="site-footer" role="contentinfo">
+  <div class="footer-inner">
+    <div class="footer-col">
+      <h4>Explore</h4>
+      <a href="#birds">Bird Directory</a>
+      <a href="#wildlife">Other Wildlife</a>
+      <a href="#parks">Parks & Hotspots</a>
+      <a href="#rare">Rare Sightings</a>
+    </div>
+    <div class="footer-col">
+      <h4>Learn</h4>
+      <a href="#learn">Birding Basics</a>
+      <a href="#quiz">Take a Quiz</a>
+      <a href="#about">About This Site</a>
+      <a href="#search">Search</a>
+    </div>
+    <div class="footer-col">
+      <h4>Sources</h4>
+      <a href="https://ebird.org/region/US-CA-059/bird-list" target="_blank" rel="noopener noreferrer">eBird — Orange County</a>
+      <a href="https://seaandsageaudubon.org/" target="_blank" rel="noopener noreferrer">Sea and Sage Audubon</a>
+      <a href="https://www.allaboutbirds.org/" target="_blank" rel="noopener noreferrer">All About Birds</a>
+      <a href="https://www.chinohillsstatepark.org/" target="_blank" rel="noopener noreferrer">Chino Hills State Park</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>Birds of Yorba Linda — An educational resource. Not a live bird tracker.</p>
+  </div>
+</footer>
+
+<script src="./data.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>
