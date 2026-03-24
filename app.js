@@ -107,6 +107,18 @@ function seasonIcon(s) {
   return icons[s] || '☀';
 }
 
+function seasonBadge(s) {
+  const map = {
+    'Year-round': 'badge-green',
+    'Winter': 'badge-blue',
+    'Spring': 'badge-warm',
+    'Summer': 'badge-earth',
+    'Fall': 'badge-danger',
+    'Fall-Winter': 'badge-blue'
+  };
+  return map[s] || 'badge-earth';
+}
+
 function renderSources(sources) {
   if (!sources || !sources.length) return '';
   return `<div class="sources-list"><h3>Sources</h3><p>${sources.map((s,i) => `[${i+1}] <a href="${s.url}" target="_blank" rel="noopener noreferrer">${s.text}</a>`).join(' &nbsp;')}</p></div>`;
@@ -119,9 +131,9 @@ function birdCard(bird) {
       <h3>${bird.name}</h3>
       <p class="scientific">${bird.scientific}</p>
       <div class="badges">
-        <span class="badge ${statusBadge(bird.status)}">${bird.status}</span>
-        <span class="badge ${encounterBadge(bird.encounter)}">${bird.encounter}</span>
-        <span class="badge badge-earth">${bird.season}</span>
+        <span class="badge ${statusBadge(bird.status)}">◌ ${bird.status}</span>
+        <span class="badge ${encounterBadge(bird.encounter)}">◇ ${bird.encounter}</span>
+        <span class="badge ${seasonBadge(bird.season)}">○ ${bird.season}</span>
       </div>
     </div>
   </a>`;
