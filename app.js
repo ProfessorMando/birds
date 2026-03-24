@@ -6,12 +6,16 @@
 let currentTheme = 'light';
 let currentFilters = { habitat: '', season: '', encounter: '', group: '', conservation: '' };
 let quizState = null;
+const THEME_STORAGE_KEY = 'themePreference';
 
 // ===== INIT =====
 function init() {
   // Theme
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    currentTheme = 'dark';
+  const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+  if (savedTheme === 'light' || savedTheme === 'dark') {
+    currentTheme = savedTheme;
+  } else {
+    currentTheme = getInitialThemeFromTimeZone();
   }
   document.documentElement.setAttribute('data-theme', currentTheme);
   updateThemeButton();
@@ -25,8 +29,16 @@ function init() {
 window.toggleTheme = function() {
   currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', currentTheme);
+  window.localStorage.setItem(THEME_STORAGE_KEY, currentTheme);
   updateThemeButton();
 };
+
+function getInitialThemeFromTimeZone() {
+  // Browser Date values are already localized to the user's time zone.
+  // Default to light between 7:00 and 18:59 local time, dark otherwise.
+  const hour = new Date().getHours();
+  return (hour >= 7 && hour < 19) ? 'light' : 'dark';
+}
 
 function updateThemeButton() {
   const btn = document.getElementById('theme-toggle');
