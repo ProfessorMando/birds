@@ -550,6 +550,17 @@
   color: var(--color-primary);
 }
 .about-content p { margin-bottom: var(--space-4); }
+.about-content .learn-section a {
+  color: var(--color-primary);
+  text-decoration-color: var(--color-primary);
+  text-underline-offset: 0.12em;
+  font-weight: 600;
+}
+.about-content .learn-section a:hover,
+.about-content .learn-section a:focus-visible {
+  color: var(--color-primary-hover);
+  text-decoration-color: var(--color-primary-hover);
+}
 
 /* ===== FOOTER ===== */
 .site-footer {
