@@ -298,7 +298,11 @@
 .badge-earth { background: var(--color-earth-light); color: var(--color-earth); }
 .badge-warm { background: var(--color-warm-light); color: var(--color-warm); }
 .badge-danger { background: #fde8e4; color: var(--color-danger); }
+.badge-habitat { background: #ede8ff; color: #5a3eb4; }
+.badge-diet { background: #e3f5ef; color: #1f7a5a; }
 [data-theme="dark"] .badge-danger { background: #3a2220; }
+[data-theme="dark"] .badge-habitat { background: #312850; color: #c8bbff; }
+[data-theme="dark"] .badge-diet { background: #1e3a32; color: #90dec4; }
 
 /* ===== FILTER BAR ===== */
 .filter-bar {
