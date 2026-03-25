@@ -131,36 +131,15 @@ function seasonBadge(s) {
   return map[s] || 'badge-earth';
 }
 
-function wildlifeHabitatGroup(id) {
+function wildlifeCategory(type) {
   const map = {
-    'western-fence-lizard': 'Desert/Scrubland',
-    'california-ground-squirrel': 'Desert/Scrubland',
-    'desert-cottontail': 'Desert/Scrubland',
-    'southern-pacific-rattlesnake': 'Desert/Scrubland',
-    'pacific-gopher-snake': 'Forest/Woodland',
-    'coyote': 'Forest/Woodland',
-    'bobcat': 'Forest/Woodland',
-    'gray-fox': 'Forest/Woodland',
-    'mountain-lion': 'Forest/Woodland',
-    'mule-deer': 'Mixed Habitat'
+    'Lizard': 'Reptile',
+    'Snake': 'Reptile',
+    'Small Mammal': 'Mammal',
+    'Predator': 'Mammal',
+    'Other': 'Mammal'
   };
-  return map[id] || 'Mixed Habitat';
-}
-
-function wildlifeDietGroup(id) {
-  const map = {
-    'coyote': 'Carnivore',
-    'bobcat': 'Carnivore',
-    'gray-fox': 'Carnivore',
-    'mountain-lion': 'Carnivore',
-    'california-ground-squirrel': 'Herbivore',
-    'desert-cottontail': 'Herbivore',
-    'mule-deer': 'Herbivore',
-    'pacific-gopher-snake': 'Omnivore',
-    'southern-pacific-rattlesnake': 'Omnivore',
-    'western-fence-lizard': 'Carnivore'
-  };
-  return map[id] || 'Omnivore';
+  return map[type] || type;
 }
 
 function wildlifeRarityBadge(status) {
@@ -266,8 +245,7 @@ function wildlifeCard(w) {
       <h3>${w.name}</h3>
       <p class="scientific">${w.scientific}</p>
       <div class="badges">
-        <span class="badge badge-blue">${wildlifeHabitatGroup(w.id)}</span>
-        <span class="badge badge-earth">${wildlifeDietGroup(w.id)}</span>
+        <span class="badge badge-earth">${wildlifeCategory(w.type)}</span>
         <span class="badge ${wildlifeRarityBadge(w.status)}">${w.status}</span>
       </div>
     </div>
@@ -491,8 +469,7 @@ function renderWildlifeDetail(el, id) {
       </div>
 
       <div class="detail-badges">
-        <span class="badge badge-blue">${wildlifeHabitatGroup(w.id)}</span>
-        <span class="badge badge-earth">${wildlifeDietGroup(w.id)}</span>
+        <span class="badge badge-earth">${wildlifeCategory(w.type)}</span>
         <span class="badge ${wildlifeRarityBadge(w.status)}">${w.status}</span>
       </div>
 
