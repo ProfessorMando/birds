@@ -136,6 +136,71 @@ function renderSources(sources) {
   return `<div class="sources-list"><h3>Sources</h3><p>${sources.map((s,i) => `[${i+1}] <a href="${s.url}" target="_blank" rel="noopener noreferrer">${s.text}</a>`).join(' &nbsp;')}</p></div>`;
 }
 
+const BIRD_DIRECTORY_ORDER = [
+  // Ground birds
+  'california-quail',
+  'mourning-dove',
+  // Hummingbirds
+  'annas-hummingbird',
+  'allens-hummingbird',
+  'costas-hummingbird',
+  'rufous-hummingbird',
+  // Flycatchers
+  'black-phoebe',
+  'says-phoebe',
+  // Corvids
+  'california-scrub-jay',
+  'american-crow',
+  // Smaller songbirds
+  'bushtit',
+  'california-gnatcatcher',
+  'cactus-wren',
+  'northern-mockingbird',
+  // Sparrows and finches
+  'california-towhee',
+  'white-crowned-sparrow',
+  'house-finch',
+  'lesser-goldfinch',
+  // Other passerines
+  'yellow-rumped-warbler',
+  'cedar-waxwing',
+  'western-bluebird',
+  'nuttalls-woodpecker',
+  // Hawks and falcons
+  'red-tailed-hawk',
+  'red-shouldered-hawk',
+  'coopers-hawk',
+  'osprey',
+  'turkey-vulture',
+  'american-kestrel',
+  'peregrine-falcon',
+  // Owls
+  'great-horned-owl',
+  'barn-owl',
+  'western-screech-owl',
+  'burrowing-owl',
+  // Herons and egrets
+  'great-blue-heron',
+  'great-egret',
+  'snowy-egret',
+  'black-crowned-night-heron',
+  // Other waterbirds and shorebirds
+  'double-crested-cormorant',
+  'mallard',
+  'american-coot',
+  'western-grebe',
+  'black-necked-stilt',
+  'killdeer'
+];
+
+function getBirdDirectoryList() {
+  const byId = new Map(BIRDS.map(b => [b.id, b]));
+  const ordered = BIRD_DIRECTORY_ORDER.map(id => byId.get(id)).filter(Boolean);
+  const included = new Set(ordered.map(b => b.id));
+  const remaining = BIRDS.filter(b => !included.has(b.id));
+  return [...ordered, ...remaining];
+}
+
 function birdCard(bird) {
   return `<a href="#bird/${bird.id}" class="species-card fade-in" aria-label="Learn about ${bird.name}">
     <div class="species-card-img" data-name="${bird.name}"><img referrerpolicy="no-referrer" data-src="${bird.image}" alt="${bird.name}" loading="lazy" decoding="async" width="400" height="300" onerror="this.parentElement.classList.add('img-error');this.dataset.error='true'"></div>
@@ -257,6 +322,7 @@ function renderHome(el) {
 }
 
 function renderBirds(el) {
+  const directoryBirds = getBirdDirectoryList();
   const habitats = [...new Set(BIRDS.flatMap(b => b.habitat))].sort();
   const seasons = [...new Set(BIRDS.map(b => b.season))].sort();
   const encounters = ['Very likely', 'Likely', 'Possible', 'Uncommon', 'Rare'];
@@ -282,7 +348,7 @@ function renderBirds(el) {
         <select id="filter-group" onchange="filterBirds()"><option value="">All Groups</option>${groups.map(g => `<option value="${g}">${g}</option>`).join('')}</select>
       </div>
     </div>
-    <div id="birds-grid" class="card-grid">${BIRDS.map(b => birdCard(b)).join('')}</div>
+    <div id="birds-grid" class="card-grid">${directoryBirds.map(b => birdCard(b)).join('')}</div>
     <p id="birds-count" style="margin-top:var(--space-4);color:var(--color-text-muted);font-size:var(--text-sm)">Showing ${BIRDS.length} species</p>`;
 }
 
@@ -292,7 +358,7 @@ window.filterBirds = function() {
   const e = document.getElementById('filter-encounter')?.value || '';
   const g = document.getElementById('filter-group')?.value || '';
 
-  let filtered = BIRDS;
+  let filtered = getBirdDirectoryList();
   if (h) filtered = filtered.filter(b => b.habitat.includes(h));
   if (s) filtered = filtered.filter(b => b.season === s);
   if (e) filtered = filtered.filter(b => b.encounter === e);
