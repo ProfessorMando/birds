@@ -49,6 +49,63 @@ const BIRDS = [
 
 const WILDLIFE = [
   {
+    "id": "western-fence-lizard",
+    "name": "Western Fence Lizard",
+    "scientific": "Sceloporus occidentalis",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/Male_Sceloporus_occidentalis_occidentalis.jpg/960px-Male_Sceloporus_occidentalis_occidentalis.jpg",
+    "type": "Lizard",
+    "status": "Very Common",
+    "size": "6–8.5 in (including tail)",
+    "habitat": "Virtually everywhere — rocks, fences, walls, logs, trails. The most commonly seen reptile in the area.",
+    "identification": "Brown or gray with darker wavy bands; males have bright blue patches on belly and throat sides ('blue-bellies'); keeled, spiny scales; often seen doing push-ups on rocks",
+    "ecologicalRole": "Important insect predator. Prey for many raptors, snakes, and mammals. Remarkably, their blood kills Lyme disease bacteria in ticks, reducing Lyme disease risk for humans.",
+    "birdRelationship": "Prey item for American Kestrels, Roadrunners, and Loggerhead Shrikes. Competes with birds for insect prey. Their Lyme disease-fighting ability benefits all wildlife.",
+    "sources": [
+      {
+        "text": "California Herps",
+        "url": "https://www.californiaherps.com/"
+      }
+    ]
+  },
+  {
+    "id": "california-ground-squirrel",
+    "name": "California Ground Squirrel",
+    "scientific": "Otospermophilus beecheyi",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/California_ground_squirrel_at_Point_Lobos.jpg/960px-California_ground_squirrel_at_Point_Lobos.jpg",
+    "type": "Small Mammal",
+    "status": "Very Common",
+    "size": "14–20 in (including tail); 1–2 lbs",
+    "habitat": "Grassland, rocky hillsides, parks, oak woodland edges. Digs extensive burrow systems.",
+    "identification": "Mottled brown-gray fur with lighter cape over shoulders; bushy tail; prominent eyes; often seen standing upright at burrow entrance",
+    "ecologicalRole": "Ecosystem engineer — burrows provide homes for Burrowing Owls, snakes, and invertebrates. Important prey for raptors and predators. Soil aeration from digging benefits plant growth.",
+    "birdRelationship": "Burrows provide critical nesting habitat for Burrowing Owls. Important prey for Red-tailed Hawks, Golden Eagles, and other raptors. Ground squirrel eradication programs directly harm Burrowing Owl populations.",
+    "sources": [
+      {
+        "text": "CDFW",
+        "url": "https://wildlife.ca.gov/"
+      }
+    ]
+  },
+  {
+    "id": "pacific-gopher-snake",
+    "name": "Pacific Gopher Snake",
+    "scientific": "Pituophis catenifer catenifer",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Pituophis_catenifer_catenifer_%28Carrizo_Plain%29.jpg/960px-Pituophis_catenifer_catenifer_%28Carrizo_Plain%29.jpg",
+    "type": "Snake",
+    "status": "Very Common",
+    "size": "3–7 ft (one of the largest snakes in the area)",
+    "habitat": "Virtually all habitats — chaparral, woodland, grassland, suburban edges. Very common and widespread.",
+    "identification": "Tan or yellowish body with dark brown blotches; pointed nose; round pupils (non-venomous); can flatten head and hiss loudly, mimicking a rattlesnake",
+    "ecologicalRole": "Major rodent predator. Non-venomous constrictor. Benefits agriculture and human habitation by controlling gophers and rats.",
+    "birdRelationship": "Known nest predator — climbs to raid bird nests for eggs and nestlings. Also controls rodent populations that compete with birds for seeds.",
+    "sources": [
+      {
+        "text": "California Herps",
+        "url": "https://www.californiaherps.com/"
+      }
+    ]
+  },
+  {
     "id": "coyote",
     "name": "Coyote",
     "scientific": "Canis latrans",
@@ -72,63 +129,17 @@ const WILDLIFE = [
     ]
   },
   {
-    "id": "bobcat",
-    "name": "Bobcat",
-    "scientific": "Lynx rufus",
-    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Bobcat_%28Lynx_rufus%29_California.jpg/960px-Bobcat_%28Lynx_rufus%29_California.jpg",
-    "type": "Predator",
-    "status": "Uncommon",
-    "size": "2–3.5 ft length; 15–35 lbs",
-    "habitat": "Chaparral, coastal sage scrub, oak woodland, canyon edges. Prefers dense vegetation for stalking. Active at dawn and dusk.",
-    "identification": "Tawny-brown coat with black spots; short 'bobbed' tail with black tip on top and white underneath; ear tufts; cheek ruffs",
-    "ecologicalRole": "Apex predator in urban-wildland interface. Controls rabbit and rodent populations. Presence indicates healthy ecosystem with sufficient prey base and cover.",
-    "birdRelationship": "Occasional bird predator (ground-nesting species, roosting birds). Controls rodent and rabbit populations that influence vegetation structure used by birds for nesting and foraging.",
-    "sources": [
-      {
-        "text": "CDFW",
-        "url": "https://wildlife.ca.gov/"
-      },
-      {
-        "text": "Chino Hills State Park",
-        "url": "https://www.chinohillsstatepark.org/"
-      }
-    ]
-  },
-  {
-    "id": "mountain-lion",
-    "name": "Mountain Lion",
-    "scientific": "Puma concolor",
-    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Mountain_Lion_in_Glacier_National_Park.jpg/960px-Mountain_Lion_in_Glacier_National_Park.jpg",
-    "type": "Predator",
-    "status": "Rare",
-    "size": "5–9 ft (nose to tail); 80–200 lbs",
-    "habitat": "Remote canyons, dense chaparral, foothill woodland. Requires large territory (100+ square miles for males). Uses wildlife corridors between mountain ranges.",
-    "identification": "Large, tawny-colored cat; long, heavy tail with dark tip; small rounded ears; powerful build; retractable claws",
-    "ecologicalRole": "Apex predator. Controls deer populations, preventing overgrazing. Presence drives 'landscape of fear' ecology where prey animals avoid certain areas, allowing vegetation recovery.",
-    "birdRelationship": "Rarely preys on birds directly. Indirectly benefits bird habitat by controlling deer populations that overgraze shrubs used by nesting birds.",
-    "sources": [
-      {
-        "text": "CDFW",
-        "url": "https://wildlife.ca.gov/"
-      },
-      {
-        "text": "Chino Hills State Park",
-        "url": "https://www.chinohillsstatepark.org/"
-      }
-    ]
-  },
-  {
-    "id": "gray-fox",
-    "name": "Gray Fox",
-    "scientific": "Urocyon cinereoargenteus",
-    "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Gray%20fox.jpg",
-    "type": "Predator",
-    "status": "Uncommon",
-    "size": "3–3.5 ft (nose to tail); 7–14 lbs",
-    "habitat": "Oak woodland, chaparral, riparian areas. The only canid that can climb trees. Active mostly at night.",
-    "identification": "Grizzled gray coat; rusty-red sides, neck, and legs; white throat and belly; black stripe down top of tail; more cat-like face than coyote",
-    "ecologicalRole": "Mesopredator. Controls small mammal and insect populations. Disperses seeds from fruit consumption. Competes with coyotes (subordinate).",
-    "birdRelationship": "Occasional egg and nestling predator. Primarily benefits birds by controlling rodent and insect populations. Fruit-eating disperses native plant seeds that provide bird habitat.",
+    "id": "desert-cottontail",
+    "name": "Desert Cottontail",
+    "scientific": "Sylvilagus audubonii",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Sylvilagus_audubonii_2.jpg/960px-Sylvilagus_audubonii_2.jpg",
+    "type": "Small Mammal",
+    "status": "Common",
+    "size": "12–15 in; 1.5–2.5 lbs",
+    "habitat": "Chaparral, coastal sage scrub, grassland, suburban edges. Active dawn and dusk.",
+    "identification": "Pale gray-brown fur; large ears with little fur inside; white cotton-puff tail; large eyes; relatively long legs",
+    "ecologicalRole": "Critical prey species for nearly all local predators (coyotes, bobcats, hawks, owls, snakes). Herbivore that influences plant community composition through selective grazing.",
+    "birdRelationship": "Primary prey for Red-tailed Hawks, Great Horned Owls, and Cooper's Hawks. Rabbit population health directly influences raptor nesting success.",
     "sources": [
       {
         "text": "CDFW",
@@ -156,74 +167,40 @@ const WILDLIFE = [
     ]
   },
   {
-    "id": "pacific-gopher-snake",
-    "name": "Pacific Gopher Snake",
-    "scientific": "Pituophis catenifer catenifer",
-    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Pituophis_catenifer_catenifer_%28Carrizo_Plain%29.jpg/960px-Pituophis_catenifer_catenifer_%28Carrizo_Plain%29.jpg",
-    "type": "Snake",
-    "status": "Common",
-    "size": "3–7 ft (one of the largest snakes in the area)",
-    "habitat": "Virtually all habitats — chaparral, woodland, grassland, suburban edges. Very common and widespread.",
-    "identification": "Tan or yellowish body with dark brown blotches; pointed nose; round pupils (non-venomous); can flatten head and hiss loudly, mimicking a rattlesnake",
-    "ecologicalRole": "Major rodent predator. Non-venomous constrictor. Benefits agriculture and human habitation by controlling gophers and rats.",
-    "birdRelationship": "Known nest predator — climbs to raid bird nests for eggs and nestlings. Also controls rodent populations that compete with birds for seeds.",
-    "sources": [
-      {
-        "text": "California Herps",
-        "url": "https://www.californiaherps.com/"
-      }
-    ]
-  },
-  {
-    "id": "western-fence-lizard",
-    "name": "Western Fence Lizard",
-    "scientific": "Sceloporus occidentalis",
-    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/Male_Sceloporus_occidentalis_occidentalis.jpg/960px-Male_Sceloporus_occidentalis_occidentalis.jpg",
-    "type": "Lizard",
-    "status": "Very Common",
-    "size": "6–8.5 in (including tail)",
-    "habitat": "Virtually everywhere — rocks, fences, walls, logs, trails. The most commonly seen reptile in the area.",
-    "identification": "Brown or gray with darker wavy bands; males have bright blue patches on belly and throat sides ('blue-bellies'); keeled, spiny scales; often seen doing push-ups on rocks",
-    "ecologicalRole": "Important insect predator. Prey for many raptors, snakes, and mammals. Remarkably, their blood kills Lyme disease bacteria in ticks, reducing Lyme disease risk for humans.",
-    "birdRelationship": "Prey item for American Kestrels, Roadrunners, and Loggerhead Shrikes. Competes with birds for insect prey. Their Lyme disease-fighting ability benefits all wildlife.",
-    "sources": [
-      {
-        "text": "California Herps",
-        "url": "https://www.californiaherps.com/"
-      }
-    ]
-  },
-  {
-    "id": "desert-cottontail",
-    "name": "Desert Cottontail",
-    "scientific": "Sylvilagus audubonii",
-    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Sylvilagus_audubonii_2.jpg/960px-Sylvilagus_audubonii_2.jpg",
-    "type": "Small Mammal",
-    "status": "Common",
-    "size": "12–15 in; 1.5–2.5 lbs",
-    "habitat": "Chaparral, coastal sage scrub, grassland, suburban edges. Active dawn and dusk.",
-    "identification": "Pale gray-brown fur; large ears with little fur inside; white cotton-puff tail; large eyes; relatively long legs",
-    "ecologicalRole": "Critical prey species for nearly all local predators (coyotes, bobcats, hawks, owls, snakes). Herbivore that influences plant community composition through selective grazing.",
-    "birdRelationship": "Primary prey for Red-tailed Hawks, Great Horned Owls, and Cooper's Hawks. Rabbit population health directly influences raptor nesting success.",
+    "id": "bobcat",
+    "name": "Bobcat",
+    "scientific": "Lynx rufus",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Bobcat_%28Lynx_rufus%29_California.jpg/960px-Bobcat_%28Lynx_rufus%29_California.jpg",
+    "type": "Predator",
+    "status": "Occasional",
+    "size": "2–3.5 ft length; 15–35 lbs",
+    "habitat": "Chaparral, coastal sage scrub, oak woodland, canyon edges. Prefers dense vegetation for stalking. Active at dawn and dusk.",
+    "identification": "Tawny-brown coat with black spots; short 'bobbed' tail with black tip on top and white underneath; ear tufts; cheek ruffs",
+    "ecologicalRole": "Apex predator in urban-wildland interface. Controls rabbit and rodent populations. Presence indicates healthy ecosystem with sufficient prey base and cover.",
+    "birdRelationship": "Occasional bird predator (ground-nesting species, roosting birds). Controls rodent and rabbit populations that influence vegetation structure used by birds for nesting and foraging.",
     "sources": [
       {
         "text": "CDFW",
         "url": "https://wildlife.ca.gov/"
+      },
+      {
+        "text": "Chino Hills State Park",
+        "url": "https://www.chinohillsstatepark.org/"
       }
     ]
   },
   {
-    "id": "california-ground-squirrel",
-    "name": "California Ground Squirrel",
-    "scientific": "Otospermophilus beecheyi",
-    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/California_ground_squirrel_at_Point_Lobos.jpg/960px-California_ground_squirrel_at_Point_Lobos.jpg",
-    "type": "Small Mammal",
-    "status": "Common",
-    "size": "14–20 in (including tail); 1–2 lbs",
-    "habitat": "Grassland, rocky hillsides, parks, oak woodland edges. Digs extensive burrow systems.",
-    "identification": "Mottled brown-gray fur with lighter cape over shoulders; bushy tail; prominent eyes; often seen standing upright at burrow entrance",
-    "ecologicalRole": "Ecosystem engineer — burrows provide homes for Burrowing Owls, snakes, and invertebrates. Important prey for raptors and predators. Soil aeration from digging benefits plant growth.",
-    "birdRelationship": "Burrows provide critical nesting habitat for Burrowing Owls. Important prey for Red-tailed Hawks, Golden Eagles, and other raptors. Ground squirrel eradication programs directly harm Burrowing Owl populations.",
+    "id": "gray-fox",
+    "name": "Gray Fox",
+    "scientific": "Urocyon cinereoargenteus",
+    "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Gray%20fox.jpg",
+    "type": "Predator",
+    "status": "Occasional",
+    "size": "3–3.5 ft (nose to tail); 7–14 lbs",
+    "habitat": "Oak woodland, chaparral, riparian areas. The only canid that can climb trees. Active mostly at night.",
+    "identification": "Grizzled gray coat; rusty-red sides, neck, and legs; white throat and belly; black stripe down top of tail; more cat-like face than coyote",
+    "ecologicalRole": "Mesopredator. Controls small mammal and insect populations. Disperses seeds from fruit consumption. Competes with coyotes (subordinate).",
+    "birdRelationship": "Occasional egg and nestling predator. Primarily benefits birds by controlling rodent and insect populations. Fruit-eating disperses native plant seeds that provide bird habitat.",
     "sources": [
       {
         "text": "CDFW",
@@ -237,12 +214,35 @@ const WILDLIFE = [
     "scientific": "Odocoileus hemionus",
     "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Mule_deer_in_California.jpg/960px-Mule_deer_in_California.jpg",
     "type": "Other",
-    "status": "Common",
+    "status": "Occasional",
     "size": "4–7 ft length; 100–300 lbs",
     "habitat": "Chaparral, oak woodland, grassland edges. Common in Chino Hills State Park and suburban-wildland interface.",
     "identification": "Gray-brown coat (tawny in summer); large mule-like ears; black-tipped white tail; bucks have forked antlers; bounding 'stotting' gait",
     "ecologicalRole": "Major herbivore affecting plant community structure. Prey for mountain lions. Deer browsing influences vegetation height and density, which affects bird nesting habitat.",
     "birdRelationship": "Browsing creates open understory that benefits ground-foraging birds. Overgrazing can destroy shrub nesting habitat. Deer ticks host diseases that affect birds.",
+    "sources": [
+      {
+        "text": "CDFW",
+        "url": "https://wildlife.ca.gov/"
+      },
+      {
+        "text": "Chino Hills State Park",
+        "url": "https://www.chinohillsstatepark.org/"
+      }
+    ]
+  },
+  {
+    "id": "mountain-lion",
+    "name": "Mountain Lion",
+    "scientific": "Puma concolor",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Mountain_Lion_in_Glacier_National_Park.jpg/960px-Mountain_Lion_in_Glacier_National_Park.jpg",
+    "type": "Predator",
+    "status": "Rare",
+    "size": "5–9 ft (nose to tail); 80–200 lbs",
+    "habitat": "Remote canyons, dense chaparral, foothill woodland. Requires large territory (100+ square miles for males). Uses wildlife corridors between mountain ranges.",
+    "identification": "Large, tawny-colored cat; long, heavy tail with dark tip; small rounded ears; powerful build; retractable claws",
+    "ecologicalRole": "Apex predator. Controls deer populations, preventing overgrazing. Presence drives 'landscape of fear' ecology where prey animals avoid certain areas, allowing vegetation recovery.",
+    "birdRelationship": "Rarely preys on birds directly. Indirectly benefits bird habitat by controlling deer populations that overgraze shrubs used by nesting birds.",
     "sources": [
       {
         "text": "CDFW",
