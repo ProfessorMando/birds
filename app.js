@@ -131,6 +131,28 @@ function seasonBadge(s) {
   return map[s] || 'badge-earth';
 }
 
+function wildlifeCategory(type) {
+  const map = {
+    'Lizard': 'Reptile',
+    'Snake': 'Reptile',
+    'Small Mammal': 'Mammal',
+    'Predator': 'Mammal',
+    'Other': 'Mammal'
+  };
+  return map[type] || type;
+}
+
+function wildlifeRarityBadge(status) {
+  const map = {
+    'Very Common': 'badge-green',
+    'Common': 'badge-blue',
+    'Occasional': 'badge-warm',
+    'Uncommon': 'badge-earth',
+    'Rare': 'badge-danger'
+  };
+  return map[status] || 'badge-earth';
+}
+
 function renderSources(sources) {
   if (!sources || !sources.length) return '';
   return `<div class="sources-list"><h3>Sources</h3><p>${sources.map((s,i) => `[${i+1}] <a href="${s.url}" target="_blank" rel="noopener noreferrer">${s.text}</a>`).join(' &nbsp;')}</p></div>`;
@@ -223,8 +245,8 @@ function wildlifeCard(w) {
       <h3>${w.name}</h3>
       <p class="scientific">${w.scientific}</p>
       <div class="badges">
-        <span class="badge badge-earth">${w.type}</span>
-        <span class="badge badge-green">${w.status}</span>
+        <span class="badge badge-earth">${wildlifeCategory(w.type)}</span>
+        <span class="badge ${wildlifeRarityBadge(w.status)}">${w.status}</span>
       </div>
     </div>
   </a>`;
@@ -447,8 +469,8 @@ function renderWildlifeDetail(el, id) {
       </div>
 
       <div class="detail-badges">
-        <span class="badge badge-earth">${w.type}</span>
-        <span class="badge badge-green">${w.status}</span>
+        <span class="badge badge-earth">${wildlifeCategory(w.type)}</span>
+        <span class="badge ${wildlifeRarityBadge(w.status)}">${w.status}</span>
       </div>
 
       <div class="detail-section">
