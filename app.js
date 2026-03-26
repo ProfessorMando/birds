@@ -4,7 +4,6 @@
 
 // ===== STATE =====
 let currentTheme = 'light';
-let currentFilters = { habitat: '', season: '', encounter: '', group: '', conservation: '' };
 let quizState = null;
 const THEME_STORAGE_KEY = 'themePreference';
 
@@ -72,8 +71,10 @@ function onRoute() {
   if (nav) nav.classList.remove('open');
 
   // Update active nav
-  document.querySelectorAll('.nav-main a').forEach(a => {
-    a.classList.toggle('active', a.getAttribute('href') === hash || hash.startsWith(a.getAttribute('href') + '/'));
+  const navLinks = document.querySelectorAll('.nav-main a');
+  navLinks.forEach((link) => {
+    const href = link.getAttribute('href');
+    link.classList.toggle('active', href === hash || hash.startsWith(href + '/'));
   });
 
   // Route
@@ -237,6 +238,34 @@ const BIRD_DIRECTORY_ORDER = [
   'killdeer'
 ];
 
+const BIRD_BY_ID = new Map(BIRDS.map((bird) => [bird.id, bird]));
+const PARK_BY_ID = new Map(PARKS.map((park) => [park.id, park]));
+const BIRD_BY_NAME = new Map(BIRDS.map((bird) => [bird.name, bird]));
+const DIRECTORY_BIRDS = getBirdDirectoryList();
+const FILTER_OPTIONS = {
+  habitats: [...new Set(BIRDS.flatMap((bird) => bird.habitat))].sort(),
+  seasons: [...new Set(BIRDS.map((bird) => bird.season))].sort(),
+  groups: [...new Set(BIRDS.map((bird) => bird.group))].sort()
+};
+const RARE_BIRDS = BIRDS.filter((bird) => ['Uncommon', 'Rare', 'Possible'].includes(bird.encounter));
+const PARKS_BY_TIER = [1, 2, 3].map((tier) => PARKS.filter((park) => park.tier === tier));
+const SEARCH_INDEX = {
+  birds: BIRDS.map((bird) => ({
+    item: bird,
+    haystack: [bird.name, bird.scientific, bird.group, ...bird.habitat].join(' ').toLowerCase()
+  })),
+  wildlife: WILDLIFE.map((wildlife) => ({
+    item: wildlife,
+    haystack: [wildlife.name, wildlife.scientific, wildlifeHabitatCategory(wildlife), wildlifeDietCategory(wildlife)].join(' ').toLowerCase()
+  })),
+  parks: PARKS.map((park) => ({
+    item: park,
+    haystack: [park.name, park.location, park.habitat].join(' ').toLowerCase()
+  }))
+};
+
+let searchDebounceTimer = null;
+
 function getBirdDirectoryList() {
   const byId = new Map(BIRDS.map(b => [b.id, b]));
   const ordered = BIRD_DIRECTORY_ORDER.map(id => byId.get(id)).filter(Boolean);
@@ -275,11 +304,12 @@ function wildlifeCard(w) {
   </a>`;
 }
 
+const PARK_TIER_COLORS = { 1: 'badge-green', 2: 'badge-blue', 3: 'badge-earth' };
+const PARK_TIER_LABELS = { 1: 'Must-Visit', 2: 'Important', 3: 'Notable' };
+
 function parkCard(park) {
-  const tierColors = { 1: 'badge-green', 2: 'badge-blue', 3: 'badge-earth' };
-  const tierLabels = { 1: 'Must-Visit', 2: 'Important', 3: 'Notable' };
   return `<a href="#park/${park.id}" class="park-card fade-in" aria-label="Learn about ${park.name}">
-    <span class="badge ${tierColors[park.tier]} tier-badge">Tier ${park.tier} — ${tierLabels[park.tier]}</span>
+    <span class="badge ${PARK_TIER_COLORS[park.tier]} tier-badge">Tier ${park.tier} — ${PARK_TIER_LABELS[park.tier]}</span>
     <h3>${park.name}</h3>
     <p class="location">${park.location} — ${park.distance}</p>
     <span class="habitat-tag">${park.habitat}</span>
@@ -291,9 +321,9 @@ function parkCard(park) {
 
 function renderHome(el) {
   const featured = ['california-quail', 'red-tailed-hawk', 'annas-hummingbird', 'great-blue-heron', 'western-bluebird', 'peregrine-falcon'];
-  const featuredBirds = featured.map(id => BIRDS.find(b => b.id === id)).filter(Boolean);
+  const featuredBirds = featured.map((id) => BIRD_BY_ID.get(id)).filter(Boolean);
   const featuredParks = ['chino-hills-state-park', 'yorba-regional-park', 'san-joaquin-wildlife-sanctuary'];
-  const fParks = featuredParks.map(id => PARKS.find(p => p.id === id)).filter(Boolean);
+  const fParks = featuredParks.map((id) => PARK_BY_ID.get(id)).filter(Boolean);
 
   el.innerHTML = `
     <div class="hero">
@@ -367,11 +397,10 @@ function renderHome(el) {
 }
 
 function renderBirds(el) {
-  const directoryBirds = getBirdDirectoryList();
-  const habitats = [...new Set(BIRDS.flatMap(b => b.habitat))].sort();
-  const seasons = [...new Set(BIRDS.map(b => b.season))].sort();
+  const habitats = FILTER_OPTIONS.habitats;
+  const seasons = FILTER_OPTIONS.seasons;
   const encounters = ['Very likely', 'Likely', 'Possible', 'Uncommon', 'Rare'];
-  const groups = [...new Set(BIRDS.map(b => b.group))].sort();
+  const groups = FILTER_OPTIONS.groups;
 
   el.innerHTML = `
     <div class="section-header"><h2>Bird Directory</h2><p>All ${BIRDS.length} documented species in the Yorba Linda area</p></div>
@@ -393,7 +422,7 @@ function renderBirds(el) {
         <select id="filter-group" onchange="filterBirds()"><option value="">All Groups</option>${groups.map(g => `<option value="${g}">${g}</option>`).join('')}</select>
       </div>
     </div>
-    <div id="birds-grid" class="card-grid">${directoryBirds.map(b => birdCard(b)).join('')}</div>
+    <div id="birds-grid" class="card-grid">${DIRECTORY_BIRDS.map(b => birdCard(b)).join('')}</div>
     <p id="birds-count" style="margin-top:var(--space-4);color:var(--color-text-muted);font-size:var(--text-sm)">Showing ${BIRDS.length} species</p>`;
 }
 
@@ -403,7 +432,7 @@ window.filterBirds = function() {
   const e = document.getElementById('filter-encounter')?.value || '';
   const g = document.getElementById('filter-group')?.value || '';
 
-  let filtered = getBirdDirectoryList();
+  let filtered = DIRECTORY_BIRDS;
   if (h) filtered = filtered.filter(b => b.habitat.includes(h));
   if (s) filtered = filtered.filter(b => b.season === s);
   if (e) filtered = filtered.filter(b => b.encounter === e);
@@ -416,7 +445,7 @@ window.filterBirds = function() {
 };
 
 function renderBirdDetail(el, id) {
-  const bird = BIRDS.find(b => b.id === id);
+  const bird = BIRD_BY_ID.get(id);
   if (!bird) { el.innerHTML = '<div class="empty-state"><h3>Species not found</h3><a href="#birds" class="btn-primary" style="margin-top:var(--space-4)">Browse all birds</a></div>'; return; }
 
 
@@ -523,16 +552,15 @@ function renderWildlifeDetail(el, id) {
 }
 
 function renderParks(el) {
-  const tiers = [1, 2, 3];
-  const tierLabels = { 1: 'Tier 1 — Must-Visit', 2: 'Tier 2 — Important', 3: 'Tier 3 — Notable' };
+  const tierHeadings = { 1: 'Tier 1 — Must-Visit', 2: 'Tier 2 — Important', 3: 'Tier 3 — Notable' };
 
   let html = '<div class="section-header"><h2>Parks & Birding Hotspots</h2><p>The best natural areas near Yorba Linda for wildlife watching</p></div>';
 
-  tiers.forEach(t => {
-    const tierParks = PARKS.filter(p => p.tier === t);
+  PARKS_BY_TIER.forEach((tierParks, index) => {
+    const tier = index + 1;
     if (tierParks.length) {
-      html += `<h3 style="font-family:var(--font-display);font-size:var(--text-lg);margin:var(--space-8) 0 var(--space-4);color:var(--color-primary)">${tierLabels[t]}</h3>`;
-      html += `<div class="card-grid">${tierParks.map(p => parkCard(p)).join('')}</div>`;
+      html += `<h3 style="font-family:var(--font-display);font-size:var(--text-lg);margin:var(--space-8) 0 var(--space-4);color:var(--color-primary)">${tierHeadings[tier]}</h3>`;
+      html += `<div class="card-grid">${tierParks.map((park) => parkCard(park)).join('')}</div>`;
     }
   });
 
@@ -540,10 +568,9 @@ function renderParks(el) {
 }
 
 function renderParkDetail(el, id) {
-  const park = PARKS.find(p => p.id === id);
+  const park = PARK_BY_ID.get(id);
   if (!park) { el.innerHTML = '<div class="empty-state"><h3>Park not found</h3></div>'; return; }
 
-  const tierLabels = { 1: 'Must-Visit', 2: 'Important', 3: 'Notable' };
 
   el.innerHTML = `
     <div class="detail-page fade-in">
@@ -552,7 +579,7 @@ function renderParkDetail(el, id) {
       <p style="color:var(--color-text-muted);font-size:var(--text-lg);margin-bottom:var(--space-4)">${park.location} — ${park.distance}</p>
 
       <div class="detail-badges">
-        <span class="badge badge-green">Tier ${park.tier} — ${tierLabels[park.tier]}</span>
+        <span class="badge badge-green">Tier ${park.tier} — ${PARK_TIER_LABELS[park.tier]}</span>
         <span class="badge badge-earth">${park.habitat}</span>
         <span class="badge badge-blue">Best: ${park.bestSeason}</span>
         ${park.fee ? `<span class="badge badge-warm">${park.fee}</span>` : ''}
@@ -567,7 +594,7 @@ function renderParkDetail(el, id) {
       <div class="detail-section">
         <h2>Species to Look For</h2>
         <p>${park.exampleSpecies.map(s => {
-          const bird = BIRDS.find(b => b.name === s);
+          const bird = BIRD_BY_NAME.get(s);
           return bird ? `<a href="#bird/${bird.id}" style="color:var(--color-primary);text-decoration:none;font-weight:600">${s}</a>` : s;
         }).join(', ')}</p>
       </div>
@@ -577,11 +604,9 @@ function renderParkDetail(el, id) {
 }
 
 function renderRare(el) {
-  const rare = BIRDS.filter(b => b.encounter === 'Uncommon' || b.encounter === 'Rare' || b.encounter === 'Possible');
-
   el.innerHTML = `
     <div class="section-header"><h2>Rare & Uncommon Sightings</h2><p>Species that require patience, searching, or lucky timing to encounter in the Yorba Linda area</p></div>
-    <div class="card-grid">${rare.map(b => birdCard(b)).join('')}</div>`;
+    <div class="card-grid">${RARE_BIRDS.map((bird) => birdCard(bird)).join('')}</div>`;
 }
 
 function renderLearn(el) {
@@ -796,10 +821,17 @@ function renderSearch(el) {
     <div class="section-header" style="text-align:center"><h2>Search</h2><p>Find birds, wildlife, and parks</p></div>
     <div class="search-input-wrap">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input type="search" id="search-input" placeholder="Search species, parks, habitats..." aria-label="Search" oninput="doSearch()" autofocus>
+      <input type="search" id="search-input" placeholder="Search species, parks, habitats..." aria-label="Search" oninput="scheduleSearch()" autofocus>
     </div>
     <div id="search-results"></div>`;
 }
+
+window.scheduleSearch = function() {
+  if (searchDebounceTimer) window.clearTimeout(searchDebounceTimer);
+  searchDebounceTimer = window.setTimeout(() => {
+    window.doSearch();
+  }, 120);
+};
 
 window.doSearch = function() {
   const q = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
@@ -811,25 +843,9 @@ window.doSearch = function() {
     return;
   }
 
-  const matchBirds = BIRDS.filter(b =>
-    b.name.toLowerCase().includes(q) ||
-    b.scientific.toLowerCase().includes(q) ||
-    b.group.toLowerCase().includes(q) ||
-    b.habitat.some(h => h.toLowerCase().includes(q))
-  );
-
-  const matchWildlife = WILDLIFE.filter(w =>
-    w.name.toLowerCase().includes(q) ||
-    w.scientific.toLowerCase().includes(q) ||
-    wildlifeHabitatCategory(w).toLowerCase().includes(q) ||
-    wildlifeDietCategory(w).toLowerCase().includes(q)
-  );
-
-  const matchParks = PARKS.filter(p =>
-    p.name.toLowerCase().includes(q) ||
-    p.location.toLowerCase().includes(q) ||
-    p.habitat.toLowerCase().includes(q)
-  );
+  const matchBirds = SEARCH_INDEX.birds.filter((entry) => entry.haystack.includes(q)).map((entry) => entry.item);
+  const matchWildlife = SEARCH_INDEX.wildlife.filter((entry) => entry.haystack.includes(q)).map((entry) => entry.item);
+  const matchParks = SEARCH_INDEX.parks.filter((entry) => entry.haystack.includes(q)).map((entry) => entry.item);
 
   let html = '';
   if (matchBirds.length) {
@@ -997,18 +1013,17 @@ const routeObserver = new MutationObserver(() => {
 });
 
 // ===== INIT =====
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    init();
-    const appEl = document.getElementById('main-content');
-    if (appEl) routeObserver.observe(appEl, { childList: true, subtree: true });
-    activateLazyImages();
-  });
-} else {
+function startApp() {
   init();
   const appEl = document.getElementById('main-content');
   if (appEl) routeObserver.observe(appEl, { childList: true, subtree: true });
   activateLazyImages();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', startApp);
+} else {
+  startApp();
 }
 
 })();
