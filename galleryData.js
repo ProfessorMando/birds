@@ -1,7 +1,7 @@
 // galleryData.js — user-provided supplemental gallery images for bird detail pages
 // Each entry: { url, caption, credit, license }
 
-const BIRD_GALLERY_ADDITIONS = {
+window.BIRD_GALLERY_ADDITIONS = {
   "california-quail": [
     { url: "https://upload.wikimedia.org/wikipedia/commons/e/ec/Callipepla_californica_LC0242.jpg", caption: "Pair in Thames, New Zealand.", credit: "Jörg Hempel / Wikimedia Commons", license: "CC BY-SA 3.0 de" },
     { url: "https://upload.wikimedia.org/wikipedia/commons/0/0c/Colin_de_Californie.jpg", caption: "Point Reyes National Seashore, California.", credit: "Len Blumin / Wikimedia Commons", license: "CC BY 2.0" },
