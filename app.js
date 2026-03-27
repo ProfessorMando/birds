@@ -249,6 +249,18 @@ const FILTER_OPTIONS = {
 };
 const RARE_BIRDS = BIRDS.filter((bird) => ['Uncommon', 'Rare', 'Possible'].includes(bird.encounter));
 const PARKS_BY_TIER = [1, 2, 3].map((tier) => PARKS.filter((park) => park.tier === tier));
+const BIRD_THUMBNAIL_ADJUSTMENTS = {
+  'annas-hummingbird': { scale: 0.92, y: '8%' },
+  'black-phoebe': { scale: 0.9, y: '4%' },
+  'cedar-waxwing': { scale: 0.72, y: '8%' },
+  'red-shouldered-hawk': { scale: 0.9, y: '4%' },
+  'coopers-hawk': { scale: 0.9, y: '4%' },
+  'peregrine-falcon': { scale: 0.82, y: '6%' },
+  'burrowing-owl': { scale: 0.82, y: '6%' },
+  'great-egret': { scale: 0.7, y: '8%' },
+  'double-crested-cormorant': { scale: 0.82, y: '6%' },
+  'black-necked-stilt': { scale: 0.7, y: '8%' }
+};
 const SEARCH_INDEX = {
   birds: BIRDS.map((bird) => ({
     item: bird,
@@ -274,9 +286,15 @@ function getBirdDirectoryList() {
   return [...ordered, ...remaining];
 }
 
+function birdThumbnailStyle(bird) {
+  const adjustment = BIRD_THUMBNAIL_ADJUSTMENTS[bird.id];
+  if (!adjustment) return '';
+  return ` style="--thumb-scale:${adjustment.scale};--thumb-y:${adjustment.y}"`;
+}
+
 function birdCard(bird) {
   return `<a href="#bird/${bird.id}" class="species-card fade-in" aria-label="Learn about ${bird.name}">
-    <div class="species-card-img" data-name="${bird.name}"><img referrerpolicy="no-referrer" data-src="${bird.image}" alt="${bird.name}" loading="lazy" decoding="async" width="400" height="300" onerror="this.parentElement.classList.add('img-error');this.dataset.error='true'"></div>
+    <div class="species-card-img" data-name="${bird.name}"><img referrerpolicy="no-referrer" data-src="${bird.image}" alt="${bird.name}" loading="lazy" decoding="async" width="400" height="300"${birdThumbnailStyle(bird)} onerror="this.parentElement.classList.add('img-error');this.dataset.error='true'"></div>
     <div class="species-card-body">
       <h3>${bird.name}</h3>
       <p class="scientific">${bird.scientific}</p>
