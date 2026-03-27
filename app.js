@@ -496,6 +496,9 @@ function renderBirdDetail(el, id) {
   if (!bird) { el.innerHTML = '<div class="empty-state"><h3>Species not found</h3><a href="#birds" class="btn-primary" style="margin-top:var(--space-4)">Browse all birds</a></div>'; return; }
 
 
+  const galleryImages = getBirdGalleryImages(bird);
+  window.__birdGalleryState = { birdName: bird.name, images: galleryImages, index: 0 };
+
   el.innerHTML = `
     <div class="detail-page fade-in">
       <a href="#birds" class="back-link">← Back to Bird Directory</a>
