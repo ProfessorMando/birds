@@ -345,6 +345,14 @@
   height: auto;
   object-fit: contain;
 }
+.detail-hero--slightly-smaller {
+  max-width: 88%;
+  margin-inline: auto;
+}
+.detail-hero--smaller {
+  max-width: 78%;
+  margin-inline: auto;
+}
 .detail-hero-caption {
   margin: var(--space-4) 0 var(--space-8);
 }
@@ -624,6 +632,8 @@
   .site-main { padding: var(--space-4) var(--space-3); }
   .hero { padding: var(--space-8) var(--space-3); }
   .hero h1 { font-size: var(--text-2xl); }
+  .detail-hero--slightly-smaller,
+  .detail-hero--smaller { max-width: 100%; }
   .detail-hero-caption h1 { font-size: var(--text-xl); }
   .detail-section { padding: var(--space-4); }
   .filter-bar { padding: var(--space-3); }

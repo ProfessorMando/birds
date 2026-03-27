@@ -157,6 +157,19 @@ const WILDLIFE_DIET_GROUPS = {
   'southern-pacific-rattlesnake': 'Omnivores'
 };
 
+const DETAIL_IMAGE_SIZE_BY_BIRD_ID = {
+  'annas-hummingbird': 'detail-hero--slightly-smaller',
+  'red-shouldered-hawk': 'detail-hero--slightly-smaller',
+  'coopers-hawk': 'detail-hero--slightly-smaller',
+  'double-crested-cormorant': 'detail-hero--slightly-smaller',
+  'black-necked-stilt': 'detail-hero--slightly-smaller',
+  'black-phoebe': 'detail-hero--smaller',
+  'cedar-waxwing': 'detail-hero--smaller',
+  'peregrine-falcon': 'detail-hero--smaller',
+  'burrowing-owl': 'detail-hero--smaller',
+  'great-egret': 'detail-hero--smaller'
+};
+
 function wildlifeHabitatCategory(wildlife) {
   return WILDLIFE_HABITAT_GROUPS[wildlife.id] || 'Mixed Habitat Species';
 }
@@ -187,6 +200,11 @@ function commonsOriginalImageUrl(url) {
 function renderSources(sources) {
   if (!sources || !sources.length) return '';
   return `<div class="sources-list"><h3>Sources</h3><p>${sources.map((s,i) => `[${i+1}] <a href="${s.url}" target="_blank" rel="noopener noreferrer">${s.text}</a>`).join(' &nbsp;')}</p></div>`;
+}
+
+function detailHeroClassForBird(birdId) {
+  const sizeClass = DETAIL_IMAGE_SIZE_BY_BIRD_ID[birdId];
+  return sizeClass ? `detail-hero ${sizeClass}` : 'detail-hero';
 }
 
 const BIRD_DIRECTORY_ORDER = [
@@ -481,7 +499,7 @@ function renderBirdDetail(el, id) {
   el.innerHTML = `
     <div class="detail-page fade-in">
       <a href="#birds" class="back-link">← Back to Bird Directory</a>
-      <div class="detail-hero">
+      <div class="${detailHeroClassForBird(bird.id)}">
         <img referrerpolicy="no-referrer" data-src="${commonsOriginalImageUrl(bird.image)}" alt="${bird.name}" onerror="this.parentElement.classList.add('img-error');this.parentElement.dataset.name='${bird.name}';this.dataset.error='true'">
       </div>
       <div class="detail-hero-caption">
