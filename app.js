@@ -205,8 +205,8 @@ function getBirdGalleryImages(bird) {
   const base = {
     url: commonsOriginalImageUrl(bird.image),
     caption: `${bird.name}.`,
-    credit: 'Birds of Yorba Linda',
-    license: 'Existing site image'
+    credit: '',
+    license: ''
   };
   const merged = [base, ...additions]
     .filter((image) => image && image.url)
