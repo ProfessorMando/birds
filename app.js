@@ -184,6 +184,91 @@ function commonsOriginalImageUrl(url) {
   return `${base}/${path}/${fileName}`;
 }
 
+
+function getBirdGalleryImages(bird) {
+  const additions = (window.BIRD_GALLERY_ADDITIONS && window.BIRD_GALLERY_ADDITIONS[bird.id])
+    ? window.BIRD_GALLERY_ADDITIONS[bird.id]
+    : [];
+  const base = {
+    url: commonsOriginalImageUrl(bird.image),
+    caption: `${bird.name}.`,
+    credit: 'Birds of Yorba Linda',
+    license: 'Existing site image'
+  };
+  const merged = [base, ...additions]
+    .filter((image) => image && image.url)
+    .map((image) => ({
+      url: commonsOriginalImageUrl(image.url),
+      caption: image.caption || bird.name,
+      credit: image.credit || '',
+      license: image.license || ''
+    }));
+
+  const seen = new Set();
+  return merged.filter((image) => {
+    if (seen.has(image.url)) return false;
+    seen.add(image.url);
+    return true;
+  });
+}
+
+function renderBirdGallery(images, birdName) {
+  if (!images.length) return '';
+  const heroImage = images[0];
+  const controls = images.length > 1 ? `
+    <button class="gallery-nav gallery-prev" type="button" aria-label="Previous image" onclick="shiftBirdImage(-1)">‹</button>
+    <button class="gallery-nav gallery-next" type="button" aria-label="Next image" onclick="shiftBirdImage(1)">›</button>
+  ` : '';
+
+  return `
+    <div class="detail-hero gallery-hero" data-gallery-index="0" data-gallery-total="${images.length}">
+      <img id="bird-gallery-image" referrerpolicy="no-referrer" src="${heroImage.url}" alt="${birdName} — ${heroImage.caption}" onerror="this.parentElement.classList.add('img-error');this.parentElement.dataset.name='${birdName}';this.dataset.error='true'">
+      ${controls}
+      ${images.length > 1 ? `<div class="gallery-counter" id="bird-gallery-counter">1 / ${images.length}</div>` : ''}
+    </div>
+    <div class="gallery-caption" id="bird-gallery-caption">${heroImage.caption}</div>
+    <div class="gallery-credit" id="bird-gallery-credit">${heroImage.credit}${heroImage.license ? ` • ${heroImage.license}` : ''}</div>
+    ${images.length > 1 ? `<div class="gallery-thumbs">${images.map((image, index) => `<button class="gallery-thumb ${index === 0 ? 'active' : ''}" type="button" onclick="selectBirdImage(${index})" aria-label="Show image ${index + 1}: ${image.caption}"><img referrerpolicy="no-referrer" loading="lazy" src="${image.url}" alt="${birdName} thumbnail ${index + 1}"></button>`).join('')}</div>` : ''}
+  `;
+}
+
+function updateBirdGallery(index) {
+  const state = window.__birdGalleryState;
+  if (!state || !state.images || !state.images.length) return;
+
+  const total = state.images.length;
+  const nextIndex = ((index % total) + total) % total;
+  state.index = nextIndex;
+
+  const selected = state.images[nextIndex];
+  const imageEl = document.getElementById('bird-gallery-image');
+  const captionEl = document.getElementById('bird-gallery-caption');
+  const creditEl = document.getElementById('bird-gallery-credit');
+  const counterEl = document.getElementById('bird-gallery-counter');
+
+  if (imageEl) {
+    imageEl.src = selected.url;
+    imageEl.alt = `${state.birdName} — ${selected.caption}`;
+  }
+  if (captionEl) captionEl.textContent = selected.caption;
+  if (creditEl) creditEl.textContent = `${selected.credit}${selected.license ? ` • ${selected.license}` : ''}`;
+  if (counterEl) counterEl.textContent = `${nextIndex + 1} / ${total}`;
+
+  document.querySelectorAll('.gallery-thumb').forEach((thumb, thumbIndex) => {
+    thumb.classList.toggle('active', thumbIndex === nextIndex);
+  });
+}
+
+window.shiftBirdImage = function(direction) {
+  const state = window.__birdGalleryState;
+  if (!state) return;
+  updateBirdGallery(state.index + direction);
+};
+
+window.selectBirdImage = function(index) {
+  updateBirdGallery(index);
+};
+
 function renderSources(sources) {
   if (!sources || !sources.length) return '';
   return `<div class="sources-list"><h3>Sources</h3><p>${sources.map((s,i) => `[${i+1}] <a href="${s.url}" target="_blank" rel="noopener noreferrer">${s.text}</a>`).join(' &nbsp;')}</p></div>`;
@@ -478,12 +563,13 @@ function renderBirdDetail(el, id) {
   if (!bird) { el.innerHTML = '<div class="empty-state"><h3>Species not found</h3><a href="#birds" class="btn-primary" style="margin-top:var(--space-4)">Browse all birds</a></div>'; return; }
 
 
+  const galleryImages = getBirdGalleryImages(bird);
+  window.__birdGalleryState = { birdName: bird.name, images: galleryImages, index: 0 };
+
   el.innerHTML = `
     <div class="detail-page fade-in">
       <a href="#birds" class="back-link">← Back to Bird Directory</a>
-      <div class="detail-hero">
-        <img referrerpolicy="no-referrer" data-src="${commonsOriginalImageUrl(bird.image)}" alt="${bird.name}" onerror="this.parentElement.classList.add('img-error');this.parentElement.dataset.name='${bird.name}';this.dataset.error='true'">
-      </div>
+      ${renderBirdGallery(galleryImages, bird.name)}
       <div class="detail-hero-caption">
         <h1>${bird.name}</h1>
         <p class="scientific"><em>${bird.scientific}</em></p>
