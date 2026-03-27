@@ -157,6 +157,19 @@ const WILDLIFE_DIET_GROUPS = {
   'southern-pacific-rattlesnake': 'Omnivores'
 };
 
+const DETAIL_IMAGE_SIZE_BY_BIRD_ID = {
+  'annas-hummingbird': 'detail-hero--slightly-smaller',
+  'red-shouldered-hawk': 'detail-hero--much-smaller',
+  'coopers-hawk': 'detail-hero--smaller',
+  'double-crested-cormorant': 'detail-hero--slightly-smaller',
+  'black-necked-stilt': 'detail-hero--smaller',
+  'black-phoebe': 'detail-hero--much-smaller',
+  'cedar-waxwing': 'detail-hero--much-smaller',
+  'peregrine-falcon': 'detail-hero--slightly-smaller',
+  'burrowing-owl': 'detail-hero--smaller',
+  'great-egret': 'detail-hero--smaller'
+};
+
 function wildlifeHabitatCategory(wildlife) {
   return WILDLIFE_HABITAT_GROUPS[wildlife.id] || 'Mixed Habitat Species';
 }
@@ -176,9 +189,22 @@ function wildlifeRarityBadge(status) {
   return map[status] || 'badge-earth';
 }
 
+function commonsOriginalImageUrl(url) {
+  if (!url || typeof url !== 'string') return url;
+  const match = url.match(/^(https:\/\/upload\.wikimedia\.org\/wikipedia\/commons)\/thumb\/(.+)\/([^/]+)\/(\d+)px-([^/]+)$/);
+  if (!match) return url;
+  const [, base, path, fileName] = match;
+  return `${base}/${path}/${fileName}`;
+}
+
 function renderSources(sources) {
   if (!sources || !sources.length) return '';
   return `<div class="sources-list"><h3>Sources</h3><p>${sources.map((s,i) => `[${i+1}] <a href="${s.url}" target="_blank" rel="noopener noreferrer">${s.text}</a>`).join(' &nbsp;')}</p></div>`;
+}
+
+function detailHeroClassForBird(birdId) {
+  const sizeClass = DETAIL_IMAGE_SIZE_BY_BIRD_ID[birdId];
+  return sizeClass ? `detail-hero ${sizeClass}` : 'detail-hero';
 }
 
 const BIRD_DIRECTORY_ORDER = [
@@ -473,12 +499,12 @@ function renderBirdDetail(el, id) {
   el.innerHTML = `
     <div class="detail-page fade-in">
       <a href="#birds" class="back-link">← Back to Bird Directory</a>
-      <div class="detail-hero">
-        <img referrerpolicy="no-referrer" data-src="${bird.image}" alt="${bird.name}" width="960" height="540" onerror="this.parentElement.classList.add('img-error');this.parentElement.dataset.name='${bird.name}';this.dataset.error='true'">
-        <div class="detail-hero-overlay">
-          <h1>${bird.name}</h1>
-          <p class="scientific"><em>${bird.scientific}</em></p>
-        </div>
+      <div class="${detailHeroClassForBird(bird.id)}">
+        <img referrerpolicy="no-referrer" data-src="${commonsOriginalImageUrl(bird.image)}" alt="${bird.name}" onerror="this.parentElement.classList.add('img-error');this.parentElement.dataset.name='${bird.name}';this.dataset.error='true'">
+      </div>
+      <div class="detail-hero-caption">
+        <h1>${bird.name}</h1>
+        <p class="scientific"><em>${bird.scientific}</em></p>
       </div>
 
       <div class="detail-badges">
@@ -534,11 +560,11 @@ function renderWildlifeDetail(el, id) {
     <div class="detail-page fade-in">
       <a href="#wildlife" class="back-link">← Back to Wildlife</a>
       <div class="detail-hero">
-        <img referrerpolicy="no-referrer" data-src="${w.image}" alt="${w.name}" width="960" height="540" onerror="this.parentElement.classList.add('img-error');this.parentElement.dataset.name='${w.name}';this.dataset.error='true'">
-        <div class="detail-hero-overlay">
-          <h1>${w.name}</h1>
-          <p class="scientific"><em>${w.scientific}</em></p>
-        </div>
+        <img referrerpolicy="no-referrer" data-src="${commonsOriginalImageUrl(w.image)}" alt="${w.name}" onerror="this.parentElement.classList.add('img-error');this.parentElement.dataset.name='${w.name}';this.dataset.error='true'">
+      </div>
+      <div class="detail-hero-caption">
+        <h1>${w.name}</h1>
+        <p class="scientific"><em>${w.scientific}</em></p>
       </div>
 
       <div class="detail-badges">
