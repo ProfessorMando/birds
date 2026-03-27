@@ -249,6 +249,18 @@ const FILTER_OPTIONS = {
 };
 const RARE_BIRDS = BIRDS.filter((bird) => ['Uncommon', 'Rare', 'Possible'].includes(bird.encounter));
 const PARKS_BY_TIER = [1, 2, 3].map((tier) => PARKS.filter((park) => park.tier === tier));
+const BIRD_THUMBNAIL_ADJUSTMENTS = {
+  'annas-hummingbird': { frame: '4 / 4', fit: 'contain', position: 'center top' },
+  'black-phoebe': { frame: '4 / 4', fit: 'contain', position: 'center top' },
+  'cedar-waxwing': { frame: '4 / 5', fit: 'contain', position: 'center top' },
+  'red-shouldered-hawk': { frame: '4 / 4', fit: 'contain', position: 'center top' },
+  'coopers-hawk': { frame: '4 / 4', fit: 'contain', position: 'center top' },
+  'peregrine-falcon': { frame: '4 / 4', fit: 'contain', position: 'center top' },
+  'burrowing-owl': { frame: '4 / 4', fit: 'contain', position: 'center top' },
+  'great-egret': { frame: '4 / 5', fit: 'contain', position: 'center top' },
+  'double-crested-cormorant': { frame: '4 / 4', fit: 'contain', position: 'center top' },
+  'black-necked-stilt': { frame: '4 / 5', fit: 'contain', position: 'center top' }
+};
 const SEARCH_INDEX = {
   birds: BIRDS.map((bird) => ({
     item: bird,
@@ -274,9 +286,18 @@ function getBirdDirectoryList() {
   return [...ordered, ...remaining];
 }
 
+function birdThumbnailStyles(bird) {
+  const adjustment = BIRD_THUMBNAIL_ADJUSTMENTS[bird.id];
+  if (!adjustment) return { frame: '', image: '' };
+  const frame = adjustment.frame ? ` style="--thumb-frame:${adjustment.frame}"` : '';
+  const image = ` style="--thumb-fit:${adjustment.fit || 'cover'};--thumb-position:${adjustment.position || 'center'};--thumb-hover-scale:1"`;
+  return { frame, image };
+}
+
 function birdCard(bird) {
+  const thumbStyles = birdThumbnailStyles(bird);
   return `<a href="#bird/${bird.id}" class="species-card fade-in" aria-label="Learn about ${bird.name}">
-    <div class="species-card-img" data-name="${bird.name}"><img referrerpolicy="no-referrer" data-src="${bird.image}" alt="${bird.name}" loading="lazy" decoding="async" width="400" height="300" onerror="this.parentElement.classList.add('img-error');this.dataset.error='true'"></div>
+    <div class="species-card-img" data-name="${bird.name}"${thumbStyles.frame}><img referrerpolicy="no-referrer" data-src="${bird.image}" alt="${bird.name}" loading="lazy" decoding="async" width="400" height="300"${thumbStyles.image} onerror="this.parentElement.classList.add('img-error');this.dataset.error='true'"></div>
     <div class="species-card-body">
       <h3>${bird.name}</h3>
       <p class="scientific">${bird.scientific}</p>
