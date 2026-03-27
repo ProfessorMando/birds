@@ -689,6 +689,9 @@
   .site-main { padding: var(--space-4) var(--space-3); }
   .hero { padding: var(--space-8) var(--space-3); }
   .hero h1 { font-size: var(--text-2xl); }
+  .detail-hero--slightly-smaller,
+  .detail-hero--smaller,
+  .detail-hero--much-smaller { max-width: 100%; }
   .detail-hero-caption h1 { font-size: var(--text-xl); }
   .detail-section { padding: var(--space-4); }
   .filter-bar { padding: var(--space-3); }
