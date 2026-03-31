@@ -439,12 +439,96 @@ function wildlifeCard(w) {
 const PARK_TIER_COLORS = { 1: 'badge-green', 2: 'badge-blue', 3: 'badge-earth' };
 const PARK_TIER_LABELS = { 1: 'Must-Visit', 2: 'Important', 3: 'Notable' };
 
+const PARK_MEDIA = {
+  'san-joaquin-wildlife-sanctuary': {
+    image: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/San_Joaquin_Wildlife_Sanctuary_sunset.jpg',
+    credit: 'David Eppstein',
+    license: 'CC BY-SA 3.0',
+    date: '12/02'
+  },
+  'upper-newport-bay': {
+    image: 'https://upload.wikimedia.org/wikipedia/commons/6/69/Upper_Newport_Bay.jpg',
+    credit: 'Basar',
+    license: 'CC BY-SA 3.0',
+    date: '07/08'
+  },
+  'bolsa-chica-ecological-reserve': {
+    image: 'https://upload.wikimedia.org/wikipedia/commons/6/61/Bolsa_Chica_Ecological_Reserve_from_3%2C500_ft.%2C_view_to_the_north.jpg',
+    credit: 'Eric Shalov',
+    license: 'CC BY-SA 4.0',
+    date: '05/19'
+  },
+  'chino-hills-state-park': {
+    image: 'https://upload.wikimedia.org/wikipedia/commons/7/73/Bane_Canyon_Chino_Hills_State_Park.jpg',
+    credit: 'Blervis',
+    license: 'CC0',
+    date: '01/24'
+  },
+  'prado-wetlands': {
+    image: 'https://upload.wikimedia.org/wikipedia/commons/0/05/Pradopark.jpg',
+    credit: 'DylanMoz49',
+    license: 'CC BY-SA 4.0',
+    date: '03/18'
+  },
+  'yorba-regional-park': {
+    image: 'https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2c/a3/84/8e/it-s-best-place-for-graduation.jpg?w=1100&h=-1&s=1',
+    credit: 'Anmar A (Tripadvisor)',
+    license: 'Not specified',
+    date: '06/24'
+  },
+  'peters-canyon': {
+    image: 'https://upload.wikimedia.org/wikipedia/commons/3/31/Peters_Canyon_Regional_Park_06.JPG',
+    credit: 'Nandaro',
+    license: 'CC BY-SA 3.0',
+    date: '02/14'
+  },
+  'carbon-canyon': {
+    image: 'https://upload.wikimedia.org/wikipedia/commons/1/1c/Carbon_Canyon_Regional_Park_horse_trail.jpg',
+    credit: 'David Lofink',
+    license: 'CC BY 2.0',
+    date: '04/09'
+  },
+  'santiago-oaks': {
+    image: 'https://www.ocparks.com/sites/ocparks/files/styles/landscape_1120/public/2021-05/Santiago%20Oaks%20SAOA%201110%20x%20830.jpg?h=a3ab28e2&itok=7Qk24tDv',
+    credit: 'OC Parks',
+    license: 'Not specified',
+    date: ''
+  },
+  'irvine-regional-park': {
+    image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Irvine%20Regional%20Park%20in%20December.jpg',
+    credit: 'Cbeekman',
+    license: 'CC BY-SA 3.0',
+    date: '12/12'
+  },
+  'oak-canyon-nature-center': {
+    image: 'https://upload.wikimedia.org/wikipedia/commons/f/f2/Oak_Canyon_Nature_Center_Interpretive_Center.jpg',
+    credit: 'DarkNight0917',
+    license: 'CC BY-SA 4.0',
+    date: '07/22'
+  },
+  'craig-regional-park': {
+    image: 'https://letsgooutside.org/wp-content/uploads/2025/08/fi-Craig-Regional-Park-scaled.jpg',
+    credit: "Let's Go Outside",
+    license: 'Not specified',
+    date: ''
+  }
+};
+
 function parkCard(park) {
+  const media = PARK_MEDIA[park.id] || {};
+  const photoMeta = [
+    media.credit ? `Credit: ${media.credit}` : '',
+    media.license ? `License: ${media.license}` : '',
+    media.date ? `Date: ${media.date}` : ''
+  ].filter(Boolean).join(' • ');
+
   return `<a href="#park/${park.id}" class="park-card fade-in" aria-label="Learn about ${park.name}">
+    ${media.image ? `<div class="park-card-img" data-name="${park.name}"><img referrerpolicy="no-referrer" data-src="${media.image}" alt="${park.name}" loading="lazy" decoding="async" width="400" height="300" onerror="this.parentElement.classList.add('img-error');this.dataset.error='true'"></div>` : ''}
     <span class="badge ${PARK_TIER_COLORS[park.tier]} tier-badge">Tier ${park.tier} — ${PARK_TIER_LABELS[park.tier]}</span>
     <h3>${park.name}</h3>
     <p class="location">${park.location} — ${park.distance}</p>
     <span class="habitat-tag">${park.habitat}</span>
+    ${photoMeta ? `<p class="park-photo-meta">${photoMeta}</p>` : ''}
     <p style="font-size:var(--text-sm);color:var(--color-text-muted);margin-top:var(--space-2)">${park.whyGood.slice(0, 120)}...</p>
   </a>`;
 }
