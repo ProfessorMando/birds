@@ -507,8 +507,8 @@ const PARK_MEDIA = {
     date: '07/22'
   },
   'craig-regional-park': {
-    image: '',
-    credit: 'Reddit user image',
+    image: 'https://letsgooutside.org/wp-content/uploads/2025/08/fi-Craig-Regional-Park-scaled.jpg',
+    credit: "Let's Go Outside",
     license: 'Not specified',
     date: ''
   }
