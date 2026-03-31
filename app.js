@@ -524,12 +524,14 @@ function parkCard(park) {
 
   return `<a href="#park/${park.id}" class="park-card fade-in" aria-label="Learn about ${park.name}">
     ${media.image ? `<div class="park-card-img" data-name="${park.name}"><img referrerpolicy="no-referrer" data-src="${media.image}" alt="${park.name}" loading="lazy" decoding="async" width="400" height="300" onerror="this.parentElement.classList.add('img-error');this.dataset.error='true'"></div>` : ''}
-    <span class="badge ${PARK_TIER_COLORS[park.tier]} tier-badge">Tier ${park.tier} — ${PARK_TIER_LABELS[park.tier]}</span>
-    <h3>${park.name}</h3>
-    <p class="location">${park.location} — ${park.distance}</p>
-    <span class="habitat-tag">${park.habitat}</span>
-    ${photoMeta ? `<p class="park-photo-meta">${photoMeta}</p>` : ''}
-    <p style="font-size:var(--text-sm);color:var(--color-text-muted);margin-top:var(--space-2)">${park.whyGood.slice(0, 120)}...</p>
+    <div class="park-card-content">
+      <span class="badge ${PARK_TIER_COLORS[park.tier]} tier-badge">Tier ${park.tier} — ${PARK_TIER_LABELS[park.tier]}</span>
+      <h3>${park.name}</h3>
+      <p class="location">${park.location} — ${park.distance}</p>
+      <span class="habitat-tag">${park.habitat}</span>
+      ${photoMeta ? `<p class="park-photo-meta">${photoMeta}</p>` : ''}
+      <p style="font-size:var(--text-sm);color:var(--color-text-muted);margin-top:var(--space-2)">${park.whyGood.slice(0, 120)}...</p>
+    </div>
   </a>`;
 }
 
@@ -787,11 +789,19 @@ function renderParks(el) {
 function renderParkDetail(el, id) {
   const park = PARK_BY_ID.get(id);
   if (!park) { el.innerHTML = '<div class="empty-state"><h3>Park not found</h3></div>'; return; }
+  const media = PARK_MEDIA[park.id] || {};
+  const detailPhotoMeta = [
+    media.credit ? `Author/Copyright: ${media.credit}` : '',
+    media.license ? `License: ${media.license}` : '',
+    media.date ? `Date: ${media.date}` : ''
+  ].filter(Boolean).join(' • ');
 
 
   el.innerHTML = `
     <div class="detail-page fade-in">
       <a href="#parks" class="back-link">← Back to Parks</a>
+      ${media.image ? `<div class="detail-hero"><img referrerpolicy="no-referrer" data-src="${media.image}" alt="${park.name}" onerror="this.parentElement.classList.add('img-error');this.parentElement.dataset.name='${park.name}';this.dataset.error='true'"></div>
+      ${detailPhotoMeta ? `<p class="detail-photo-meta">${detailPhotoMeta}</p>` : ''}` : ''}
       <h1 style="font-family:var(--font-display);font-size:var(--text-2xl);margin-bottom:var(--space-2)">${park.name}</h1>
       <p style="color:var(--color-text-muted);font-size:var(--text-lg);margin-bottom:var(--space-4)">${park.location} — ${park.distance}</p>
 
