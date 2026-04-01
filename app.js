@@ -305,25 +305,25 @@ function renderSources(sources) {
 function renderDetailOpenTracker() {
   return `
     <div class="sources-list">
-      <p id="detail-open-tracker-text">Global detail opens — loading…</p>
+      <p id="detail-open-tracker-text" class="profile-visits-bubble">Profile visits — loading…</p>
     </div>
   `;
 }
 
-async function updateGlobalDetailTracker(kind) {
+async function updateGlobalDetailTracker(kind, id) {
   const trackerText = document.getElementById('detail-open-tracker-text');
   if (!trackerText) return;
   try {
     const response = await fetch('/api/detail-open', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ kind })
+      body: JSON.stringify({ kind, id })
     });
     if (!response.ok) throw new Error('detail-open request failed');
     const data = await response.json();
-    trackerText.textContent = `Global detail opens — Birds: ${data.birds}, Animals: ${data.wildlife}, Parks: ${data.parks}`;
+    trackerText.textContent = `Profile visits: ${data.count}`;
   } catch (_) {
-    trackerText.textContent = 'Global detail opens are currently unavailable.';
+    trackerText.textContent = 'Profile visits are currently unavailable.';
   }
 }
 
@@ -756,7 +756,7 @@ function renderBirdDetail(el, id) {
       ${renderSources(bird.sources)}
       ${renderDetailOpenTracker()}
     </div>`;
-  updateGlobalDetailTracker('bird');
+  updateGlobalDetailTracker('bird', bird.id);
 }
 
 function renderWildlife(el) {
@@ -811,7 +811,7 @@ function renderWildlifeDetail(el, id) {
       ${renderSources(w.sources)}
       ${renderDetailOpenTracker()}
     </div>`;
-  updateGlobalDetailTracker('wildlife');
+  updateGlobalDetailTracker('wildlife', w.id);
 }
 
 function renderParks(el) {
@@ -875,7 +875,7 @@ function renderParkDetail(el, id) {
       ${renderSources(park.sources)}
       ${renderDetailOpenTracker()}
     </div>`;
-  updateGlobalDetailTracker('park');
+  updateGlobalDetailTracker('park', park.id);
 }
 
 function renderParkMap(park) {

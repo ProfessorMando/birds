@@ -13,6 +13,6 @@ This project expects a Cloudflare Worker environment variable/secret named `g_ma
 
 - Global detail-open counts are handled by a Durable Object class named `DetailCounter` in `worker.js`.
 - API routes:
-  - `POST /api/detail-open` with JSON body `{ "kind": "bird" | "wildlife" | "park" }` increments and returns global counts.
-  - `GET /api/detail-counts` returns current global counts.
+  - `POST /api/detail-open` with JSON body `{ "kind": "bird" | "wildlife" | "park", "id": "<profile-id>" }` increments and returns the global count for that specific profile.
+  - `GET /api/detail-counts?key=<kind:id>` returns the current global count for that specific profile key.
 - `wrangler.toml` includes the Durable Object binding and migration required for deployment.
