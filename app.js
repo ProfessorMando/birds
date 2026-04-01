@@ -6,7 +6,7 @@
 let currentTheme = 'light';
 let quizState = null;
 const THEME_STORAGE_KEY = 'themePreference';
-const GOOGLE_MAPS_EMBED_API_KEY = 'AIzaSyCQQeaE7_DyROb0ppXsamvdgYULPgJdQNM';
+let GOOGLE_MAPS_EMBED_API_KEY = '';
 
 // ===== INIT =====
 function init() {
@@ -23,6 +23,8 @@ function init() {
   // Router
   window.addEventListener('hashchange', onRoute);
   onRoute();
+
+  loadRuntimeConfig();
 }
 
 // ===== THEME TOGGLE =====
@@ -102,6 +104,18 @@ function onRoute() {
   }
 
   requestAnimationFrame(activateLazyImages);
+}
+
+async function loadRuntimeConfig() {
+  try {
+    const response = await fetch('/api/config');
+    if (!response.ok) return;
+    const config = await response.json();
+    GOOGLE_MAPS_EMBED_API_KEY = (config && config.g_map_key) ? config.g_map_key : '';
+    if ((window.location.hash || '#home').startsWith('#park/')) onRoute();
+  } catch (error) {
+    GOOGLE_MAPS_EMBED_API_KEY = '';
+  }
 }
 
 // ===== HELPERS =====
