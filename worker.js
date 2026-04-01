@@ -19,6 +19,11 @@ export default {
       const stub = env.DETAIL_COUNTER.get(id);
       return stub.fetch(request);
     }
+    if (url.pathname === '/api/quiz-stats' || url.pathname === '/api/quiz-complete') {
+      const id = env.DETAIL_COUNTER.idFromName('global');
+      const stub = env.DETAIL_COUNTER.get(id);
+      return stub.fetch(request);
+    }
 
     return env.ASSETS.fetch(request);
   }
@@ -74,6 +79,62 @@ export class DetailCounter {
       await this.state.storage.put(countKey, next);
 
       return new Response(JSON.stringify({ key, count: next }), {
+        headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' }
+      });
+    }
+
+    if (url.pathname === '/api/quiz-stats' && request.method === 'GET') {
+      const scores = await this.state.storage.get('quiz:scores');
+      const normalizedScores = Array.isArray(scores)
+        ? scores.filter((score) => Number.isFinite(score))
+        : [];
+      const completions = normalizedScores.length;
+      const averageScore = completions
+        ? Math.round((normalizedScores.reduce((sum, score) => sum + score, 0) / completions) * 10) / 10
+        : 0;
+
+      return new Response(JSON.stringify({ completions, averageScore }), {
+        headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' }
+      });
+    }
+
+    if (url.pathname === '/api/quiz-complete' && request.method === 'POST') {
+      let score = null;
+      let totalQuestions = null;
+      try {
+        const body = await request.json();
+        score = body?.score;
+        totalQuestions = body?.totalQuestions;
+      } catch (_) {
+        return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
+          status: 400,
+          headers: { 'content-type': 'application/json; charset=utf-8' }
+        });
+      }
+
+      if (!Number.isFinite(score) || !Number.isFinite(totalQuestions) || totalQuestions <= 0 || score < 0 || score > totalQuestions) {
+        return new Response(JSON.stringify({ error: 'Invalid quiz completion payload' }), {
+          status: 400,
+          headers: { 'content-type': 'application/json; charset=utf-8' }
+        });
+      }
+
+      const normalizedScore = Math.round((score / totalQuestions) * 100);
+      const scores = await this.state.storage.get('quiz:scores');
+      const normalizedScores = Array.isArray(scores)
+        ? scores.filter((entry) => Number.isFinite(entry))
+        : [];
+      normalizedScores.push(normalizedScore);
+      await this.state.storage.put('quiz:scores', normalizedScores);
+
+      const completions = normalizedScores.length;
+      const averageScore = Math.round((normalizedScores.reduce((sum, entry) => sum + entry, 0) / completions) * 10) / 10;
+
+      return new Response(JSON.stringify({
+        completions,
+        averageScore,
+        latestScore: normalizedScore
+      }), {
         headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' }
       });
     }

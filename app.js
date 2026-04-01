@@ -5,7 +5,9 @@
 // ===== STATE =====
 let currentTheme = 'light';
 let quizState = null;
+let quizGlobalStats = { completions: 0, averageScore: 0 };
 const THEME_STORAGE_KEY = 'themePreference';
+const QUIZ_HISTORY_STORAGE_KEY = 'quizHistory';
 let GOOGLE_MAPS_EMBED_API_KEY = '';
 
 // ===== INIT =====
@@ -969,6 +971,11 @@ function renderLearn(el) {
 
 // ===== QUIZ =====
 function renderQuiz(el) {
+  const completionsLabel = quizGlobalStats.completions === 1
+    ? '1 quiz completed globally'
+    : `${quizGlobalStats.completions} quizzes completed globally`;
+  const quizHistory = getUserQuizHistory();
+
   if (quizState && quizState.active) {
     renderQuizQuestion(el);
     return;
@@ -978,12 +985,27 @@ function renderQuiz(el) {
     <div class="quiz-container">
       <div class="section-header" style="text-align:center">
         <h2>Test Your Knowledge</h2>
-        <p>5 random questions from our bank of ${QUIZ_QUESTIONS.length} questions. You have 5 minutes!</p>
       </div>
       <div style="text-align:center">
         <button class="btn-primary" onclick="startQuiz()" style="font-size:var(--text-lg);padding:var(--space-4) var(--space-8)">Start Quiz</button>
+        <p class="quiz-meta-text">${completionsLabel}</p>
+        <details class="quiz-history-panel">
+          <summary>Your past quiz results</summary>
+          ${quizHistory.length ? `
+            <ul class="quiz-history-list">
+              ${quizHistory.map((entry) => `
+                <li class="quiz-history-item">
+                  <span>${entry.score}%</span>
+                  <span>${formatQuizHistoryDate(entry.date)}</span>
+                </li>
+              `).join('')}
+            </ul>
+          ` : '<p class="quiz-history-empty">No quiz results yet.</p>'}
+        </details>
       </div>
     </div>`;
+
+  loadQuizStats();
 }
 
 window.startQuiz = function() {
@@ -1080,36 +1102,126 @@ function endQuiz() {
   const el = document.getElementById('main-content');
   if (!quizState) { renderQuiz(el); return; }
 
-  const pct = Math.round((quizState.score / quizState.questions.length) * 100);
-  let msg = pct >= 80 ? 'Excellent! You really know your birds!' : pct >= 60 ? 'Good job! You\'re learning fast!' : 'Keep exploring — every birder starts somewhere!';
+  const finalQuizState = { ...quizState, answers: [...quizState.answers] };
+  const pct = Math.round((finalQuizState.score / finalQuizState.questions.length) * 100);
+  saveUserQuizResult(pct);
+  recordQuizCompletion(finalQuizState.score, finalQuizState.questions.length).then((stats) => {
+    const averageScore = Number.isFinite(stats?.averageScore) ? stats.averageScore : quizGlobalStats.averageScore;
+    const performanceMessage = buildQuizPerformanceMessage(pct, averageScore);
 
-  el.innerHTML = `
-    <div class="quiz-container">
-      <div class="quiz-score fade-in">
-        <h2>Quiz Complete!</h2>
-        <div class="score-num">${quizState.score} / ${quizState.questions.length}</div>
-        <p style="margin:var(--space-4) 0;color:var(--color-text-muted)">${msg}</p>
+    el.innerHTML = `
+      <div class="quiz-container">
+        <div class="quiz-score fade-in">
+          <h2>Quiz Complete!</h2>
+          <div class="score-num">${finalQuizState.score} / ${finalQuizState.questions.length}</div>
+          <p style="margin:var(--space-3) 0;color:var(--color-text-muted)">Your score: ${pct}%</p>
+          <p style="margin:var(--space-3) 0;color:var(--color-text-muted)">Global average score: ${averageScore.toFixed(1)}%</p>
+          <p style="margin:var(--space-4) 0;color:var(--color-text-muted)">${performanceMessage}</p>
 
-        <div style="margin:var(--space-6) 0;text-align:left">
-          ${quizState.answers.map((a, i) => `
-            <div style="padding:var(--space-3);border-bottom:1px solid var(--color-divider);display:flex;gap:var(--space-3);align-items:start">
-              <span style="font-size:var(--text-lg)">${a.isCorrect ? '✓' : '✗'}</span>
-              <div>
-                <p style="font-weight:600;margin-bottom:var(--space-1)">${a.question}</p>
-                ${!a.isCorrect ? `<p style="color:var(--color-danger);font-size:var(--text-sm)">Your answer: ${a.selected}</p>` : ''}
-                <p style="color:var(--color-success);font-size:var(--text-sm)">Correct: ${a.correct}</p>
+          <div style="margin:var(--space-6) 0;text-align:left">
+            ${finalQuizState.answers.map((a) => `
+              <div style="padding:var(--space-3);border-bottom:1px solid var(--color-divider);display:flex;gap:var(--space-3);align-items:start">
+                <span style="font-size:var(--text-lg)">${a.isCorrect ? '✓' : '✗'}</span>
+                <div>
+                  <p style="font-weight:600;margin-bottom:var(--space-1)">${a.question}</p>
+                  ${!a.isCorrect ? `<p style="color:var(--color-danger);font-size:var(--text-sm)">Your answer: ${a.selected}</p>` : ''}
+                  <p style="color:var(--color-success);font-size:var(--text-sm)">Correct: ${a.correct}</p>
+                </div>
               </div>
-            </div>
-          `).join('')}
-        </div>
+            `).join('')}
+          </div>
 
-        <div style="display:flex;gap:var(--space-3);justify-content:center;flex-wrap:wrap">
-          <button class="btn-primary" onclick="quizState=null;startQuiz()">Try Again</button>
-          <a href="#birds" class="btn-secondary">Explore Birds</a>
+          <div style="display:flex;gap:var(--space-3);justify-content:center;flex-wrap:wrap">
+            <button class="btn-primary" onclick="quizState=null;startQuiz()">Try Again</button>
+            <a href="#birds" class="btn-secondary">Explore Birds</a>
+          </div>
         </div>
       </div>
     </div>`;
+  });
   quizState = null;
+}
+
+function getUserQuizHistory() {
+  try {
+    const history = JSON.parse(window.localStorage.getItem(QUIZ_HISTORY_STORAGE_KEY) || '[]');
+    if (!Array.isArray(history)) return [];
+    return history
+      .filter((entry) => Number.isFinite(entry?.score) && typeof entry?.date === 'string')
+      .slice(0, 25);
+  } catch (_) {
+    return [];
+  }
+}
+
+function saveUserQuizResult(scorePct) {
+  const history = getUserQuizHistory();
+  history.unshift({
+    score: scorePct,
+    date: new Date().toISOString()
+  });
+  window.localStorage.setItem(QUIZ_HISTORY_STORAGE_KEY, JSON.stringify(history.slice(0, 25)));
+}
+
+function formatQuizHistoryDate(isoDate) {
+  const date = new Date(isoDate);
+  if (Number.isNaN(date.getTime())) return 'Unknown date';
+  return date.toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
+}
+
+async function loadQuizStats() {
+  try {
+    const response = await fetch('/api/quiz-stats');
+    if (!response.ok) return;
+    const stats = await response.json();
+    quizGlobalStats = {
+      completions: Number.isFinite(stats?.completions) ? stats.completions : 0,
+      averageScore: Number.isFinite(stats?.averageScore) ? stats.averageScore : 0
+    };
+    if ((window.location.hash || '#home') === '#quiz' && (!quizState || !quizState.active)) {
+      const meta = document.querySelector('.quiz-meta-text');
+      if (meta) {
+        meta.textContent = quizGlobalStats.completions === 1
+          ? '1 quiz completed globally'
+          : `${quizGlobalStats.completions} quizzes completed globally`;
+      }
+    }
+  } catch (_) {
+    // Keep existing stats if unavailable.
+  }
+}
+
+async function recordQuizCompletion(score, totalQuestions) {
+  try {
+    const response = await fetch('/api/quiz-complete', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json; charset=utf-8' },
+      body: JSON.stringify({ score, totalQuestions })
+    });
+    if (!response.ok) return quizGlobalStats;
+    const stats = await response.json();
+    quizGlobalStats = {
+      completions: Number.isFinite(stats?.completions) ? stats.completions : quizGlobalStats.completions,
+      averageScore: Number.isFinite(stats?.averageScore) ? stats.averageScore : quizGlobalStats.averageScore
+    };
+    return quizGlobalStats;
+  } catch (_) {
+    return quizGlobalStats;
+  }
+}
+
+function buildQuizPerformanceMessage(scorePct, averageScore) {
+  if (scorePct === 100) {
+    return 'Perfect score. Congratulations on getting 100%.';
+  }
+  if (scorePct > averageScore) {
+    return 'Great work. You scored above the global average.';
+  }
+  return 'Keep learning and try again to beat the average.';
 }
 
 function renderSearch(el) {
