@@ -483,6 +483,19 @@
   font-size: var(--text-sm);
 }
 .sources-list a:hover { text-decoration: underline; }
+.profile-visits-bubble {
+  display: inline-flex;
+  align-items: center;
+  margin-top: var(--space-2);
+  margin-bottom: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-light);
+  color: var(--color-accent);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  border: 1px solid var(--color-accent);
+}
 
 /* ===== PARK CARD ===== */
 .park-card {

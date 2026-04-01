@@ -5,3 +5,11 @@ compatibility_date = "2026-04-01"
 [assets]
 directory = "."
 binding = "ASSETS"
+
+[[durable_objects.bindings]]
+name = "DETAIL_COUNTER"
+class_name = "DetailCounter"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["DetailCounter"]
