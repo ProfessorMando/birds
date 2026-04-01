@@ -302,6 +302,31 @@ function renderSources(sources) {
   return `<div class="sources-list"><h3>Sources</h3><p>${sources.map((s,i) => `[${i+1}] <a href="${s.url}" target="_blank" rel="noopener noreferrer">${s.text}</a>`).join(' &nbsp;')}</p></div>`;
 }
 
+function renderDetailOpenTracker() {
+  return `
+    <div class="sources-list">
+      <p id="detail-open-tracker-text">Global detail opens — loading…</p>
+    </div>
+  `;
+}
+
+async function updateGlobalDetailTracker(kind) {
+  const trackerText = document.getElementById('detail-open-tracker-text');
+  if (!trackerText) return;
+  try {
+    const response = await fetch('/api/detail-open', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ kind })
+    });
+    if (!response.ok) throw new Error('detail-open request failed');
+    const data = await response.json();
+    trackerText.textContent = `Global detail opens — Birds: ${data.birds}, Animals: ${data.wildlife}, Parks: ${data.parks}`;
+  } catch (_) {
+    trackerText.textContent = 'Global detail opens are currently unavailable.';
+  }
+}
+
 function detailHeroClassForBird(birdId) {
   const sizeClass = DETAIL_IMAGE_SIZE_BY_BIRD_ID[birdId];
   return sizeClass ? `detail-hero ${sizeClass}` : 'detail-hero';
@@ -729,7 +754,9 @@ function renderBirdDetail(el, id) {
       ${bird.conservationNotes ? `<div class="detail-section"><h2><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Conservation</h2><p>${bird.conservationNotes}</p></div>` : ''}
 
       ${renderSources(bird.sources)}
+      ${renderDetailOpenTracker()}
     </div>`;
+  updateGlobalDetailTracker('bird');
 }
 
 function renderWildlife(el) {
@@ -782,7 +809,9 @@ function renderWildlifeDetail(el, id) {
       </div>
 
       ${renderSources(w.sources)}
+      ${renderDetailOpenTracker()}
     </div>`;
+  updateGlobalDetailTracker('wildlife');
 }
 
 function renderParks(el) {
@@ -844,7 +873,9 @@ function renderParkDetail(el, id) {
       </div>
 
       ${renderSources(park.sources)}
+      ${renderDetailOpenTracker()}
     </div>`;
+  updateGlobalDetailTracker('park');
 }
 
 function renderParkMap(park) {
