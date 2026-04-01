@@ -8,6 +8,7 @@ let quizState = null;
 let quizGlobalStats = { completions: 0, averageScore: 0 };
 const THEME_STORAGE_KEY = 'themePreference';
 const QUIZ_HISTORY_STORAGE_KEY = 'quizHistory';
+const UPVOTE_USER_STORAGE_KEY = 'upvoteUserId';
 let GOOGLE_MAPS_EMBED_API_KEY = '';
 
 // ===== INIT =====
@@ -328,6 +329,104 @@ async function updateGlobalDetailTracker(kind, id) {
     trackerText.textContent = 'Profile visits are currently unavailable.';
   }
 }
+
+function renderUpvoteWidget() {
+  return `
+    <div class="upvote-widget">
+      <button
+        id="detail-upvote-button"
+        class="upvote-button"
+        type="button"
+        aria-pressed="false"
+        aria-label="Upvote this wildlife profile"
+        onclick="toggleDetailUpvote()"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 4L20 16H4L12 4Z"></path>
+        </svg>
+      </button>
+      <p id="detail-upvote-text" class="upvote-count-text">Sightings — loading…</p>
+    </div>
+  `;
+}
+
+function getOrCreateUpvoteUserId() {
+  let userId = window.localStorage.getItem(UPVOTE_USER_STORAGE_KEY);
+  if (userId) return userId;
+  if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+    userId = window.crypto.randomUUID();
+  } else {
+    userId = `anon-${Math.random().toString(36).slice(2)}-${Date.now()}`;
+  }
+  window.localStorage.setItem(UPVOTE_USER_STORAGE_KEY, userId);
+  return userId;
+}
+
+function setUpvoteUiState({ count, upvoted, loading, error }) {
+  const button = document.getElementById('detail-upvote-button');
+  const text = document.getElementById('detail-upvote-text');
+  if (!button || !text) return;
+
+  button.classList.toggle('upvoted', !!upvoted);
+  button.disabled = !!loading;
+  button.setAttribute('aria-pressed', upvoted ? 'true' : 'false');
+
+  if (error) {
+    text.textContent = 'Sighting votes are currently unavailable.';
+    return;
+  }
+  const safeCount = Number.isFinite(count) ? count : 0;
+  text.textContent = `Spotted in the wild: ${safeCount}`;
+}
+
+async function initializeDetailUpvote(kind, id) {
+  const button = document.getElementById('detail-upvote-button');
+  if (!button) return;
+  const userId = getOrCreateUpvoteUserId();
+  button.dataset.kind = kind;
+  button.dataset.id = id;
+  button.dataset.userId = userId;
+
+  setUpvoteUiState({ count: 0, upvoted: false, loading: true, error: false });
+  try {
+    const query = new URLSearchParams({ kind, id, userId });
+    const response = await fetch(`/api/upvote-status?${query.toString()}`);
+    if (!response.ok) throw new Error('upvote-status request failed');
+    const data = await response.json();
+    setUpvoteUiState({ count: data.count, upvoted: data.upvoted, loading: false, error: false });
+  } catch (_) {
+    setUpvoteUiState({ count: 0, upvoted: false, loading: false, error: true });
+  }
+}
+
+window.toggleDetailUpvote = async function() {
+  const button = document.getElementById('detail-upvote-button');
+  if (!button || button.disabled) return;
+  const kind = button.dataset.kind;
+  const id = button.dataset.id;
+  const userId = button.dataset.userId;
+  if (!kind || !id || !userId) return;
+
+  setUpvoteUiState({
+    count: Number.NaN,
+    upvoted: button.classList.contains('upvoted'),
+    loading: true,
+    error: false
+  });
+
+  try {
+    const response = await fetch('/api/upvote-toggle', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ kind, id, userId })
+    });
+    if (!response.ok) throw new Error('upvote-toggle request failed');
+    const data = await response.json();
+    setUpvoteUiState({ count: data.count, upvoted: data.upvoted, loading: false, error: false });
+  } catch (_) {
+    setUpvoteUiState({ count: 0, upvoted: false, loading: false, error: true });
+  }
+};
 
 function detailHeroClassForBird(birdId) {
   const sizeClass = DETAIL_IMAGE_SIZE_BY_BIRD_ID[birdId];
@@ -719,6 +818,7 @@ function renderBirdDetail(el, id) {
       <div class="detail-hero-caption">
         <h1>${bird.name}</h1>
         <p class="scientific"><em>${bird.scientific}</em></p>
+        ${renderUpvoteWidget()}
       </div>
 
       <div class="detail-badges">
@@ -759,6 +859,7 @@ function renderBirdDetail(el, id) {
       ${renderDetailOpenTracker()}
     </div>`;
   updateGlobalDetailTracker('bird', bird.id);
+  initializeDetailUpvote('bird', bird.id);
 }
 
 function renderWildlife(el) {
@@ -781,6 +882,7 @@ function renderWildlifeDetail(el, id) {
       <div class="detail-hero-caption">
         <h1>${w.name}</h1>
         <p class="scientific"><em>${w.scientific}</em></p>
+        ${renderUpvoteWidget()}
       </div>
 
       <div class="detail-badges">
@@ -814,6 +916,7 @@ function renderWildlifeDetail(el, id) {
       ${renderDetailOpenTracker()}
     </div>`;
   updateGlobalDetailTracker('wildlife', w.id);
+  initializeDetailUpvote('wildlife', w.id);
 }
 
 function renderParks(el) {

@@ -14,7 +14,12 @@ export default {
       });
     }
 
-    if (url.pathname === '/api/detail-open' || url.pathname === '/api/detail-counts') {
+    if (
+      url.pathname === '/api/detail-open' ||
+      url.pathname === '/api/detail-counts' ||
+      url.pathname === '/api/upvote-status' ||
+      url.pathname === '/api/upvote-toggle'
+    ) {
       const id = env.DETAIL_COUNTER.idFromName('global');
       const stub = env.DETAIL_COUNTER.get(id);
       return stub.fetch(request);
@@ -135,6 +140,77 @@ export class DetailCounter {
         averageScore,
         latestScore: normalizedScore
       }), {
+        headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' }
+      });
+    }
+
+    if (url.pathname === '/api/upvote-status' && request.method === 'GET') {
+      const kind = url.searchParams.get('kind') || '';
+      const id = url.searchParams.get('id') || '';
+      const userId = url.searchParams.get('userId') || '';
+
+      if (!VALID_DETAIL_KINDS.has(kind) || !id || !userId) {
+        return new Response(JSON.stringify({ error: 'Invalid upvote status query' }), {
+          status: 400,
+          headers: { 'content-type': 'application/json; charset=utf-8' }
+        });
+      }
+
+      const key = `${kind}:${id}`;
+      const count = await this.state.storage.get(`upvote-count:${key}`);
+      const upvoted = Boolean(await this.state.storage.get(`upvote-user:${userId}:${key}`));
+      return new Response(JSON.stringify({
+        key,
+        count: Number.isFinite(count) ? count : 0,
+        upvoted
+      }), {
+        headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' }
+      });
+    }
+
+    if (url.pathname === '/api/upvote-toggle' && request.method === 'POST') {
+      let kind = '';
+      let id = '';
+      let userId = '';
+      try {
+        const body = await request.json();
+        kind = typeof body?.kind === 'string' ? body.kind : '';
+        id = typeof body?.id === 'string' ? body.id : '';
+        userId = typeof body?.userId === 'string' ? body.userId : '';
+      } catch (_) {
+        return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
+          status: 400,
+          headers: { 'content-type': 'application/json; charset=utf-8' }
+        });
+      }
+
+      if (!VALID_DETAIL_KINDS.has(kind) || !id || !userId) {
+        return new Response(JSON.stringify({ error: 'Invalid upvote payload' }), {
+          status: 400,
+          headers: { 'content-type': 'application/json; charset=utf-8' }
+        });
+      }
+
+      const key = `${kind}:${id}`;
+      const countKey = `upvote-count:${key}`;
+      const userVoteKey = `upvote-user:${userId}:${key}`;
+      const hasUpvoted = Boolean(await this.state.storage.get(userVoteKey));
+      const currentCount = await this.state.storage.get(countKey);
+      const normalizedCount = Number.isFinite(currentCount) ? currentCount : 0;
+
+      if (hasUpvoted) {
+        const nextCount = Math.max(0, normalizedCount - 1);
+        await this.state.storage.delete(userVoteKey);
+        await this.state.storage.put(countKey, nextCount);
+        return new Response(JSON.stringify({ key, count: nextCount, upvoted: false }), {
+          headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' }
+        });
+      }
+
+      const nextCount = normalizedCount + 1;
+      await this.state.storage.put(userVoteKey, true);
+      await this.state.storage.put(countKey, nextCount);
+      return new Response(JSON.stringify({ key, count: nextCount, upvoted: true }), {
         headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' }
       });
     }
