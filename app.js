@@ -7,6 +7,7 @@ let currentTheme = 'light';
 let quizState = null;
 let quizGlobalStats = { completions: 0, averageScore: 0 };
 const THEME_STORAGE_KEY = 'themePreference';
+const QUIZ_HISTORY_STORAGE_KEY = 'quizHistory';
 let GOOGLE_MAPS_EMBED_API_KEY = '';
 
 // ===== INIT =====
@@ -973,6 +974,7 @@ function renderQuiz(el) {
   const completionsLabel = quizGlobalStats.completions === 1
     ? '1 quiz completed globally'
     : `${quizGlobalStats.completions} quizzes completed globally`;
+  const quizHistory = getUserQuizHistory();
 
   if (quizState && quizState.active) {
     renderQuizQuestion(el);
@@ -987,6 +989,19 @@ function renderQuiz(el) {
       <div style="text-align:center">
         <button class="btn-primary" onclick="startQuiz()" style="font-size:var(--text-lg);padding:var(--space-4) var(--space-8)">Start Quiz</button>
         <p class="quiz-meta-text">${completionsLabel}</p>
+        <details class="quiz-history-panel">
+          <summary>Your past quiz results</summary>
+          ${quizHistory.length ? `
+            <ul class="quiz-history-list">
+              ${quizHistory.map((entry) => `
+                <li class="quiz-history-item">
+                  <span>${entry.score}%</span>
+                  <span>${formatQuizHistoryDate(entry.date)}</span>
+                </li>
+              `).join('')}
+            </ul>
+          ` : '<p class="quiz-history-empty">No quiz results yet.</p>'}
+        </details>
       </div>
     </div>`;
 
@@ -1089,6 +1104,7 @@ function endQuiz() {
 
   const finalQuizState = { ...quizState, answers: [...quizState.answers] };
   const pct = Math.round((finalQuizState.score / finalQuizState.questions.length) * 100);
+  saveUserQuizResult(pct);
   recordQuizCompletion(finalQuizState.score, finalQuizState.questions.length).then((stats) => {
     const averageScore = Number.isFinite(stats?.averageScore) ? stats.averageScore : quizGlobalStats.averageScore;
     const performanceMessage = buildQuizPerformanceMessage(pct, averageScore);
@@ -1124,6 +1140,37 @@ function endQuiz() {
     </div>`;
   });
   quizState = null;
+}
+
+function getUserQuizHistory() {
+  try {
+    const history = JSON.parse(window.localStorage.getItem(QUIZ_HISTORY_STORAGE_KEY) || '[]');
+    if (!Array.isArray(history)) return [];
+    return history
+      .filter((entry) => Number.isFinite(entry?.score) && typeof entry?.date === 'string')
+      .slice(0, 25);
+  } catch (_) {
+    return [];
+  }
+}
+
+function saveUserQuizResult(scorePct) {
+  const history = getUserQuizHistory();
+  history.unshift({
+    score: scorePct,
+    date: new Date().toISOString()
+  });
+  window.localStorage.setItem(QUIZ_HISTORY_STORAGE_KEY, JSON.stringify(history.slice(0, 25)));
+}
+
+function formatQuizHistoryDate(isoDate) {
+  const date = new Date(isoDate);
+  if (Number.isNaN(date.getTime())) return 'Unknown date';
+  return date.toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
 }
 
 async function loadQuizStats() {
