@@ -1,9 +1,10 @@
 # birds
 Yorba Linda Birds
 
-## Cloudflare Pages runtime config
+## Cloudflare Workers runtime config
 
-This project expects a Cloudflare Pages environment variable/secret named `g_map_key`.
+This project expects a Cloudflare Worker environment variable/secret named `g_map_key`.
 
-- In Cloudflare Pages, add `g_map_key` for both Preview and Production environments.
-- The key is read at runtime from `functions/api/config.js` and consumed by the SPA in `app.js`.
+- The worker script is `worker.js` and serves static assets via the `ASSETS` binding configured in `wrangler.toml`.
+- The key is read at runtime from the `/api/config` route in `worker.js` and consumed by the SPA in `app.js`.
+- In Cloudflare, add `g_map_key` as a Worker secret/variable for this Worker.
