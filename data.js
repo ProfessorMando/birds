@@ -259,6 +259,7 @@ const WILDLIFE = [
 const PARKS = [
   {
     "id": "san-joaquin-wildlife-sanctuary",
+    "placeId": "ChIJIV55rHHe3IARuE6JRWq530Y",
     "name": "San Joaquin Wildlife Sanctuary",
     "location": "Irvine",
     "distance": "~12 miles SW of Yorba Linda",
@@ -283,6 +284,7 @@ const PARKS = [
   },
   {
     "id": "upper-newport-bay",
+    "placeId": "ChIJ6YrP-cnf3IARajvZAC9pdfY",
     "name": "Upper Newport Bay Nature Preserve",
     "location": "Newport Beach",
     "distance": "~15 miles SW of Yorba Linda",
@@ -307,6 +309,7 @@ const PARKS = [
   },
   {
     "id": "bolsa-chica-ecological-reserve",
+    "placeId": "ChIJ0RYcIEYk3YARTY_51Q_FyEU",
     "name": "Bolsa Chica Ecological Reserve",
     "location": "Huntington Beach",
     "distance": "~20 miles SW of Yorba Linda",
@@ -330,6 +333,7 @@ const PARKS = [
   },
   {
     "id": "chino-hills-state-park",
+    "placeId": "ChIJc2ooMaDT3IARr3-4W9Wf5Do",
     "name": "Chino Hills State Park",
     "location": "Adjacent to Yorba Linda",
     "distance": "Directly adjacent to Yorba Linda",
@@ -359,6 +363,7 @@ const PARKS = [
   },
   {
     "id": "prado-wetlands",
+    "placeId": "ChIJxTIEgWjJ3IARofEFf7dvo6o",
     "name": "Prado Wetlands",
     "location": "Riverside County border",
     "distance": "~20 miles from Yorba Linda",
@@ -382,6 +387,7 @@ const PARKS = [
   },
   {
     "id": "yorba-regional-park",
+    "placeId": "ChIJo-CFjq_R3IARdy98euM3FMk",
     "name": "Yorba Regional Park",
     "location": "Anaheim (adjacent to Yorba Linda)",
     "distance": "~5 miles from Yorba Linda",
@@ -406,6 +412,7 @@ const PARKS = [
   },
   {
     "id": "peters-canyon",
+    "placeId": "ChIJN8_ZWTbb3IARstQW2JDF7U4",
     "name": "Peters Canyon Regional Park",
     "location": "Orange/Tustin",
     "distance": "~10 miles from Yorba Linda",
@@ -429,6 +436,7 @@ const PARKS = [
   },
   {
     "id": "carbon-canyon",
+    "placeId": "ChIJla9Y1XjU3IARxCzdvorgVbg",
     "name": "Carbon Canyon Regional Park",
     "location": "Brea",
     "distance": "~3 miles from Yorba Linda",
@@ -453,6 +461,7 @@ const PARKS = [
   },
   {
     "id": "santiago-oaks",
+    "placeId": "ChIJUVEFGXvQ3IARKSp41glSFkg",
     "name": "Santiago Oaks Regional Park",
     "location": "Orange",
     "distance": "~10 miles from Yorba Linda",
@@ -477,6 +486,7 @@ const PARKS = [
   },
   {
     "id": "irvine-regional-park",
+    "placeId": "ChIJv4m3S8ba3IAR8STA5aSOQWY",
     "name": "Irvine Regional Park",
     "location": "Orange",
     "distance": "~10 miles from Yorba Linda",
@@ -501,6 +511,7 @@ const PARKS = [
   },
   {
     "id": "oak-canyon-nature-center",
+    "placeId": "ChIJYeERWBbQ3IAR5am-FH3a2Go",
     "name": "Oak Canyon Nature Center",
     "location": "Anaheim Hills",
     "distance": "~8 miles from Yorba Linda",
@@ -524,6 +535,7 @@ const PARKS = [
   },
   {
     "id": "craig-regional-park",
+    "placeId": "ChIJG1_FWK7V3IARkjII9bGecL8",
     "name": "Craig Regional Park",
     "location": "Fullerton/Brea",
     "distance": "~5 miles from Yorba Linda",
