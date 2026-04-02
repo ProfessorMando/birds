@@ -207,21 +207,12 @@ function wildlifeRarityBadge(status) {
   return map[status] || 'badge-earth';
 }
 
-function commonsOriginalImageUrl(url) {
-  if (!url || typeof url !== 'string') return url;
-  const match = url.match(/^(https:\/\/upload\.wikimedia\.org\/wikipedia\/commons)\/thumb\/(.+)\/([^/]+)\/(\d+)px-([^/]+)$/);
-  if (!match) return url;
-  const [, base, path, fileName] = match;
-  return `${base}/${path}/${fileName}`;
-}
-
-
 function getBirdGalleryImages(bird) {
   const additions = (window.BIRD_GALLERY_ADDITIONS && window.BIRD_GALLERY_ADDITIONS[bird.id])
     ? window.BIRD_GALLERY_ADDITIONS[bird.id]
     : [];
   const base = {
-    url: commonsOriginalImageUrl(bird.image),
+    url: bird.image,
     caption: `${bird.name}.`,
     credit: '',
     license: ''
@@ -229,7 +220,7 @@ function getBirdGalleryImages(bird) {
   const merged = [base, ...additions]
     .filter((image) => image && image.url)
     .map((image) => ({
-      url: commonsOriginalImageUrl(image.url),
+      url: image.url,
       caption: image.caption || bird.name,
       credit: image.credit || '',
       license: image.license || ''
@@ -253,13 +244,13 @@ function renderBirdGallery(images, birdName) {
 
   return `
     <div class="detail-hero gallery-hero" data-gallery-index="0" data-gallery-total="${images.length}">
-      <img id="bird-gallery-image" referrerpolicy="no-referrer" src="${heroImage.url}" alt="${birdName} — ${heroImage.caption}" onerror="this.parentElement.classList.add('img-error');this.parentElement.dataset.name='${birdName}';this.dataset.error='true'">
+      <img id="bird-gallery-image" referrerpolicy="strict-origin-when-cross-origin" src="${heroImage.url}" alt="${birdName} — ${heroImage.caption}" onerror="this.parentElement.classList.add('img-error');this.parentElement.dataset.name='${birdName}';this.dataset.error='true'">
       ${controls}
       ${images.length > 1 ? `<div class="gallery-counter" id="bird-gallery-counter">1 / ${images.length}</div>` : ''}
     </div>
     <div class="gallery-caption" id="bird-gallery-caption">${heroImage.caption}</div>
     <div class="gallery-credit" id="bird-gallery-credit">${heroImage.credit}${heroImage.license ? ` • ${heroImage.license}` : ''}</div>
-    ${images.length > 1 ? `<div class="gallery-thumbs">${images.map((image, index) => `<button class="gallery-thumb ${index === 0 ? 'active' : ''}" type="button" onclick="selectBirdImage(${index})" aria-label="Show image ${index + 1}: ${image.caption}"><img referrerpolicy="no-referrer" loading="lazy" src="${image.url}" alt="${birdName} thumbnail ${index + 1}"></button>`).join('')}</div>` : ''}
+    ${images.length > 1 ? `<div class="gallery-thumbs">${images.map((image, index) => `<button class="gallery-thumb ${index === 0 ? 'active' : ''}" type="button" onclick="selectBirdImage(${index})" aria-label="Show image ${index + 1}: ${image.caption}"><img referrerpolicy="strict-origin-when-cross-origin" loading="lazy" src="${image.url}" alt="${birdName} thumbnail ${index + 1}"></button>`).join('')}</div>` : ''}
   `;
 }
 
@@ -549,7 +540,7 @@ function birdThumbnailStyles(bird) {
 function birdCard(bird) {
   const thumbStyles = birdThumbnailStyles(bird);
   return `<a href="#bird/${bird.id}" class="species-card fade-in" aria-label="Learn about ${bird.name}">
-    <div class="species-card-img" data-name="${bird.name}"${thumbStyles.frame}><img referrerpolicy="no-referrer" data-src="${bird.image}" alt="${bird.name}" loading="lazy" decoding="async" width="400" height="300"${thumbStyles.image} onerror="this.parentElement.classList.add('img-error');this.dataset.error='true'"></div>
+    <div class="species-card-img" data-name="${bird.name}"${thumbStyles.frame}><img referrerpolicy="strict-origin-when-cross-origin" data-src="${bird.image}" alt="${bird.name}" loading="lazy" decoding="async" width="400" height="300"${thumbStyles.image} onerror="this.parentElement.classList.add('img-error');this.dataset.error='true'"></div>
     <div class="species-card-body">
       <h3>${bird.name}</h3>
       <p class="scientific">${bird.scientific}</p>
@@ -564,7 +555,7 @@ function birdCard(bird) {
 
 function wildlifeCard(w) {
   return `<a href="#wildlifeDetail/${w.id}" class="species-card fade-in" aria-label="Learn about ${w.name}">
-    <div class="species-card-img" data-name="${w.name}"><img referrerpolicy="no-referrer" data-src="${w.image}" alt="${w.name}" loading="lazy" decoding="async" width="400" height="300" onerror="this.parentElement.classList.add('img-error');this.dataset.error='true'"></div>
+    <div class="species-card-img" data-name="${w.name}"><img referrerpolicy="strict-origin-when-cross-origin" data-src="${w.image}" alt="${w.name}" loading="lazy" decoding="async" width="400" height="300" onerror="this.parentElement.classList.add('img-error');this.dataset.error='true'"></div>
     <div class="species-card-body">
       <h3>${w.name}</h3>
       <p class="scientific">${w.scientific}</p>
@@ -664,7 +655,7 @@ function parkCard(park) {
   ].filter(Boolean).join(' • ');
 
   return `<a href="#park/${park.id}" class="park-card fade-in" aria-label="Learn about ${park.name}">
-    ${media.image ? `<div class="park-card-img" data-name="${park.name}"><img referrerpolicy="no-referrer" data-src="${media.image}" alt="${park.name}" loading="lazy" decoding="async" width="400" height="300" onerror="this.parentElement.classList.add('img-error');this.dataset.error='true'"></div>` : ''}
+    ${media.image ? `<div class="park-card-img" data-name="${park.name}"><img referrerpolicy="strict-origin-when-cross-origin" data-src="${media.image}" alt="${park.name}" loading="lazy" decoding="async" width="400" height="300" onerror="this.parentElement.classList.add('img-error');this.dataset.error='true'"></div>` : ''}
     <div class="park-card-content">
       <span class="badge ${PARK_TIER_COLORS[park.tier]} tier-badge">Tier ${park.tier} — ${PARK_TIER_LABELS[park.tier]}</span>
       <h3>${park.name}</h3>
@@ -877,7 +868,7 @@ function renderWildlifeDetail(el, id) {
     <div class="detail-page fade-in">
       <a href="#wildlife" class="back-link">← Back to Wildlife</a>
       <div class="detail-hero">
-        <img referrerpolicy="no-referrer" data-src="${commonsOriginalImageUrl(w.image)}" alt="${w.name}" onerror="this.parentElement.classList.add('img-error');this.parentElement.dataset.name='${w.name}';this.dataset.error='true'">
+        <img referrerpolicy="strict-origin-when-cross-origin" data-src="${w.image}" alt="${w.name}" onerror="this.parentElement.classList.add('img-error');this.parentElement.dataset.name='${w.name}';this.dataset.error='true'">
       </div>
       <div class="detail-hero-caption">
         <h1>${w.name}</h1>
@@ -949,7 +940,7 @@ function renderParkDetail(el, id) {
   el.innerHTML = `
     <div class="detail-page fade-in">
       <a href="#parks" class="back-link">← Back to Parks</a>
-      ${media.image ? `<div class="detail-hero"><img referrerpolicy="no-referrer" data-src="${media.image}" alt="${park.name}" onerror="this.parentElement.classList.add('img-error');this.parentElement.dataset.name='${park.name}';this.dataset.error='true'"></div>
+      ${media.image ? `<div class="detail-hero"><img referrerpolicy="strict-origin-when-cross-origin" data-src="${media.image}" alt="${park.name}" onerror="this.parentElement.classList.add('img-error');this.parentElement.dataset.name='${park.name}';this.dataset.error='true'"></div>
       ${detailPhotoMeta ? `<p class="detail-photo-meta">${detailPhotoMeta}</p>` : ''}` : ''}
       <h1 style="font-family:var(--font-display);font-size:var(--text-2xl);margin-bottom:var(--space-2)">${park.name}</h1>
       <p style="color:var(--color-text-muted);font-size:var(--text-lg);margin-bottom:var(--space-4)">${park.location} — ${park.distance}</p>
