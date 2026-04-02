@@ -1437,7 +1437,11 @@ function renderAbout(el) {
 // - observe the rest and swap in src when they near the viewport
 // This avoids the current "refresh to see images" behavior while still
 // keeping the page reasonably light.
-const IMG_EAGER_COUNT = 8;
+const IMG_EAGER_COUNT = 4;
+const MAX_CONCURRENT_IMAGE_LOADS = 4;
+
+const imageLoadQueue = [];
+let activeImageLoads = 0;
 
 function markImageLoaded(img) {
   img.dataset.loaded = 'true';
@@ -1445,12 +1449,32 @@ function markImageLoaded(img) {
   if (img.parentElement) img.parentElement.classList.remove('img-error');
 }
 
+function finalizeImageRequest(img) {
+  if (!img || img.dataset.requestState !== 'inflight') return;
+  img.dataset.requestState = '';
+  activeImageLoads = Math.max(0, activeImageLoads - 1);
+  processImageLoadQueue();
+}
+
+function processImageLoadQueue() {
+  while (activeImageLoads < MAX_CONCURRENT_IMAGE_LOADS && imageLoadQueue.length) {
+    const next = imageLoadQueue.shift();
+    if (!next || !next.img || !next.img.dataset.src) continue;
+    const img = next.img;
+    if (img.dataset.loaded === 'true' || img.dataset.requestState === 'inflight') continue;
+    img.dataset.requestState = 'inflight';
+    activeImageLoads += 1;
+    img.loading = next.priority === 'high' ? 'eager' : 'lazy';
+    try { img.fetchPriority = next.priority; } catch (e) {}
+    img.src = img.dataset.src;
+  }
+}
+
 function loadImage(img, priority = 'auto') {
-  if (!img || !img.dataset.src || img.dataset.loaded === 'true' || img.dataset.loaded === 'pending') return;
+  if (!img || !img.dataset.src || img.dataset.loaded === 'true' || img.dataset.loaded === 'pending' || img.dataset.requestState === 'inflight') return;
   img.dataset.loaded = 'pending';
-  img.loading = priority === 'high' ? 'eager' : 'lazy';
-  try { img.fetchPriority = priority; } catch (e) {}
-  img.src = img.dataset.src;
+  imageLoadQueue.push({ img, priority });
+  processImageLoadQueue();
 }
 
 const imgObserver = new IntersectionObserver((entries) => {
@@ -1470,6 +1494,7 @@ function setupRetry(img) {
       img.dataset.retries = String(retries + 1);
       img.dataset.error = '';
       img.dataset.loaded = '';
+      img.dataset.requestState = '';
       if (img.parentElement) img.parentElement.classList.remove('img-error');
       img.removeAttribute('src');
       const rect = img.getBoundingClientRect();
@@ -1485,12 +1510,14 @@ function setupRetry(img) {
 
 document.addEventListener('load', (e) => {
   if (e.target.tagName === 'IMG' && e.target.dataset.src) {
+    finalizeImageRequest(e.target);
     markImageLoaded(e.target);
   }
 }, true);
 
 document.addEventListener('error', (e) => {
   if (e.target.tagName === 'IMG' && e.target.dataset.src) {
+    finalizeImageRequest(e.target);
     e.target.dataset.error = 'true';
     if (e.target.parentElement) e.target.parentElement.classList.add('img-error');
     setupRetry(e.target);
