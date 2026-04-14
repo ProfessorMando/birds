@@ -639,7 +639,7 @@ const PARK_MEDIA = {
     date: '07/22'
   },
   'craig-regional-park': {
-    image: 'https://letsgooutside.org/wp-content/uploads/2025/08/fi-Craig-Regional-Park-scaled.jpg',
+    image: 'https://lh3.googleusercontent.com/gps-cs-s/APNQkAFdR4YffP_W_d3swqPmkQZjy9qYMi5wVBGRnnW7unzgX9Fe9a4WzefVSgFaWtudHveZJIozPAjwoZwl1xELGOnq_GhcomdwtJrMrb80-E6Q4Kd5hBtrHtV-XI5T5itMs78spb4=s1360-w1360-h1020-rw',
     credit: "Let's Go Outside",
     license: 'Not specified',
     date: ''
