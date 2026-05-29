@@ -3,11 +3,10 @@ Yorba Linda Birds
 
 ## Cloudflare Workers runtime config
 
-This project expects a Cloudflare Worker environment variable/secret named `g_map_key`.
+This project does not require a Maps API key. Park detail pages use keyless Google Maps search links built from each park's public name and location.
 
 - The worker script is `worker.js` and serves static assets via the `ASSETS` binding configured in `wrangler.toml`.
-- The key is read at runtime from the `/api/config` route in `worker.js` and consumed by the SPA in `app.js`.
-- In Cloudflare, add `g_map_key` as a Worker secret/variable for this Worker.
+- Do not commit local API keys, `.dev.vars`, or Cloudflare secret values to this repository.
 
 ## Global detail-open tracker
 

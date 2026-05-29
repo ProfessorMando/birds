@@ -9,7 +9,6 @@ let quizGlobalStats = { completions: 0, averageScore: 0 };
 const THEME_STORAGE_KEY = 'themePreference';
 const QUIZ_HISTORY_STORAGE_KEY = 'quizHistory';
 const UPVOTE_USER_STORAGE_KEY = 'upvoteUserId';
-let GOOGLE_MAPS_EMBED_API_KEY = '';
 
 // ===== INIT =====
 function init() {
@@ -26,8 +25,6 @@ function init() {
   // Router
   window.addEventListener('hashchange', onRoute);
   onRoute();
-
-  loadRuntimeConfig();
 }
 
 // ===== THEME TOGGLE =====
@@ -107,18 +104,6 @@ function onRoute() {
   }
 
   requestAnimationFrame(activateLazyImages);
-}
-
-async function loadRuntimeConfig() {
-  try {
-    const response = await fetch('/api/config');
-    if (!response.ok) return;
-    const config = await response.json();
-    GOOGLE_MAPS_EMBED_API_KEY = (config && config.g_map_key) ? config.g_map_key : '';
-    if ((window.location.hash || '#home').startsWith('#park/')) onRoute();
-  } catch (error) {
-    GOOGLE_MAPS_EMBED_API_KEY = '';
-  }
 }
 
 // ===== HELPERS =====
@@ -975,23 +960,13 @@ function renderParkDetail(el, id) {
 }
 
 function renderParkMap(park) {
-  if (!GOOGLE_MAPS_EMBED_API_KEY) return '';
-  const query = park.placeId
-    ? `place_id:${park.placeId}`
-    : `${park.name}, ${park.location}`;
-  const src = `https://www.google.com/maps/embed/v1/place?key=${GOOGLE_MAPS_EMBED_API_KEY}&q=${encodeURIComponent(query)}`;
+  const query = `${park.name}, ${park.location}, California`;
+  const href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
   return `
     <div class="detail-section park-map-section">
       <h2>Map</h2>
-      <div class="park-map-embed">
-        <iframe
-          title="Map of ${park.name}"
-          loading="lazy"
-          referrerpolicy="no-referrer-when-downgrade"
-          src="${src}"
-          allowfullscreen>
-        </iframe>
-      </div>
+      <p>Open this park in Google Maps without storing or serving a Maps API key from this site.</p>
+      <a class="btn-secondary" href="${href}" target="_blank" rel="noopener noreferrer">Open map</a>
     </div>`;
 }
 
