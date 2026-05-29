@@ -1,5 +1,41 @@
 const VALID_DETAIL_KINDS = new Set(['bird', 'wildlife', 'park']);
 
+const SECURITY_HEADERS = {
+  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+  'Cross-Origin-Opener-Policy': 'same-origin',
+  'X-Frame-Options': 'DENY',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'X-Content-Type-Options': 'nosniff',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+  'Content-Security-Policy': [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: https://upload.wikimedia.org",
+    "font-src 'self'",
+    "connect-src 'self'",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "frame-ancestors 'none'",
+    "upgrade-insecure-requests"
+  ].join('; ')
+};
+
+function withSecurityHeaders(response, request) {
+  const next = new Response(response.body, response);
+  Object.entries(SECURITY_HEADERS).forEach(([name, value]) => next.headers.set(name, value));
+
+  const url = new URL(request.url);
+  if (/^\/images\/optimized\//.test(url.pathname) || /^\/vendor\//.test(url.pathname)) {
+    next.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+  } else if (/\.(?:css|js)$/i.test(url.pathname)) {
+    next.headers.set('Cache-Control', 'public, max-age=3600');
+  }
+
+  return next;
+}
+
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -12,15 +48,15 @@ export default {
     ) {
       const id = env.DETAIL_COUNTER.idFromName('global');
       const stub = env.DETAIL_COUNTER.get(id);
-      return stub.fetch(request);
+      return withSecurityHeaders(await stub.fetch(request), request);
     }
     if (url.pathname === '/api/quiz-stats' || url.pathname === '/api/quiz-complete') {
       const id = env.DETAIL_COUNTER.idFromName('global');
       const stub = env.DETAIL_COUNTER.get(id);
-      return stub.fetch(request);
+      return withSecurityHeaders(await stub.fetch(request), request);
     }
 
-    return env.ASSETS.fetch(request);
+    return withSecurityHeaders(await env.ASSETS.fetch(request), request);
   }
 };
 

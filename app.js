@@ -192,6 +192,45 @@ function wildlifeRarityBadge(status) {
   return map[status] || 'badge-earth';
 }
 
+
+const IMAGE_DIMENSIONS = window.IMAGE_DIMENSIONS || {};
+
+function imageDimensionAttrs(url, fallbackWidth = 960, fallbackHeight = 640) {
+  const dimensions = IMAGE_DIMENSIONS[url] || [fallbackWidth, fallbackHeight];
+  return `width="${dimensions[0]}" height="${dimensions[1]}"`;
+}
+
+function imageSrcSet(url) {
+  if (!url || !url.endsWith('-800.webp')) return '';
+  return [400, 800, 1200]
+    .map((width) => `${url.replace('-800.webp', `-${width}.webp`)} ${width}w`)
+    .join(', ');
+}
+
+function imageAttrs(url, sizes, priority = 'auto') {
+  const srcset = imageSrcSet(url);
+  const attrs = [
+    `src="${url}"`,
+    srcset ? `srcset="${srcset}"` : '',
+    `sizes="${sizes}"`,
+    'decoding="async"',
+    priority === 'high' ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"'
+  ];
+  return attrs.filter(Boolean).join(' ');
+}
+
+function deferredImageAttrs(url, sizes, priority = 'auto') {
+  const srcset = imageSrcSet(url);
+  const attrs = [
+    `data-src="${url}"`,
+    srcset ? `data-srcset="${srcset}"` : '',
+    `sizes="${sizes}"`,
+    'decoding="async"',
+    priority === 'high' ? 'loading="eager" fetchpriority="high" data-priority="high"' : 'loading="lazy"'
+  ];
+  return attrs.filter(Boolean).join(' ');
+}
+
 function getBirdGalleryImages(bird) {
   const additions = (window.BIRD_GALLERY_ADDITIONS && window.BIRD_GALLERY_ADDITIONS[bird.id])
     ? window.BIRD_GALLERY_ADDITIONS[bird.id]
@@ -229,13 +268,13 @@ function renderBirdGallery(images, birdName) {
 
   return `
     <div class="detail-hero gallery-hero" data-gallery-index="0" data-gallery-total="${images.length}">
-      <img id="bird-gallery-image" referrerpolicy="strict-origin-when-cross-origin" src="${heroImage.url}" alt="${birdName} — ${heroImage.caption}" onerror="this.parentElement.classList.add('img-error');this.parentElement.dataset.name='${birdName}';this.dataset.error='true'">
+      <img id="bird-gallery-image" referrerpolicy="strict-origin-when-cross-origin" ${imageAttrs(heroImage.url, '(max-width: 768px) 100vw, 960px', 'high')} ${imageDimensionAttrs(heroImage.url)} alt="${birdName} — ${heroImage.caption}" onerror="this.parentElement.classList.add('img-error');this.parentElement.dataset.name='${birdName}';this.dataset.error='true'">
       ${controls}
       ${images.length > 1 ? `<div class="gallery-counter" id="bird-gallery-counter">1 / ${images.length}</div>` : ''}
     </div>
     <div class="gallery-caption" id="bird-gallery-caption">${heroImage.caption}</div>
     <div class="gallery-credit" id="bird-gallery-credit">${heroImage.credit}${heroImage.license ? ` • ${heroImage.license}` : ''}</div>
-    ${images.length > 1 ? `<div class="gallery-thumbs">${images.map((image, index) => `<button class="gallery-thumb ${index === 0 ? 'active' : ''}" type="button" onclick="selectBirdImage(${index})" aria-label="Show image ${index + 1}: ${image.caption}"><img referrerpolicy="strict-origin-when-cross-origin" loading="lazy" src="${image.url}" alt="${birdName} thumbnail ${index + 1}"></button>`).join('')}</div>` : ''}
+    ${images.length > 1 ? `<div class="gallery-thumbs">${images.map((image, index) => `<button class="gallery-thumb ${index === 0 ? 'active' : ''}" type="button" onclick="selectBirdImage(${index})" aria-label="Show image ${index + 1}: ${image.caption}"><img referrerpolicy="strict-origin-when-cross-origin" ${imageAttrs(image.url, '82px')} width="82" height="70" alt="${birdName} thumbnail ${index + 1}"></button>`).join('')}</div>` : ''}
   `;
 }
 
@@ -254,6 +293,9 @@ function updateBirdGallery(index) {
   const counterEl = document.getElementById('bird-gallery-counter');
 
   if (imageEl) {
+    const srcset = imageSrcSet(selected.url);
+    if (srcset) imageEl.srcset = srcset;
+    else imageEl.removeAttribute('srcset');
     imageEl.src = selected.url;
     imageEl.alt = `${state.birdName} — ${selected.caption}`;
   }
@@ -654,7 +696,7 @@ function birdThumbnailStyles(bird) {
 function birdCard(bird) {
   const thumbStyles = birdThumbnailStyles(bird);
   return `<a href="#bird/${bird.id}" class="species-card fade-in" aria-label="Learn about ${bird.name}">
-    <div class="species-card-img" data-name="${bird.name}"${thumbStyles.frame}><img referrerpolicy="strict-origin-when-cross-origin" data-src="${bird.image}" alt="${bird.name}" loading="lazy" decoding="async" width="400" height="300"${thumbStyles.image} onerror="this.parentElement.classList.add('img-error');this.dataset.error='true'"></div>
+    <div class="species-card-img" data-name="${bird.name}"${thumbStyles.frame}><img referrerpolicy="strict-origin-when-cross-origin" ${deferredImageAttrs(bird.image, '(max-width: 640px) 100vw, (max-width: 1200px) 33vw, 400px')} alt="${bird.name}" width="400" height="300"${thumbStyles.image} onerror="this.parentElement.classList.add('img-error');this.dataset.error='true'"></div>
     <div class="species-card-body">
       <h3>${bird.name}</h3>
       <p class="scientific">${bird.scientific}</p>
@@ -669,7 +711,7 @@ function birdCard(bird) {
 
 function wildlifeCard(w) {
   return `<a href="#wildlifeDetail/${w.id}" class="species-card fade-in" aria-label="Learn about ${w.name}">
-    <div class="species-card-img" data-name="${w.name}"><img referrerpolicy="strict-origin-when-cross-origin" data-src="${w.image}" alt="${w.name}" loading="lazy" decoding="async" width="400" height="300" onerror="this.parentElement.classList.add('img-error');this.dataset.error='true'"></div>
+    <div class="species-card-img" data-name="${w.name}"><img referrerpolicy="strict-origin-when-cross-origin" ${deferredImageAttrs(w.image, '(max-width: 640px) 100vw, (max-width: 1200px) 33vw, 400px')} alt="${w.name}" width="400" height="300" onerror="this.parentElement.classList.add('img-error');this.dataset.error='true'"></div>
     <div class="species-card-body">
       <h3>${w.name}</h3>
       <p class="scientific">${w.scientific}</p>
@@ -687,73 +729,73 @@ const PARK_TIER_LABELS = { 1: 'Must-Visit', 2: 'Important', 3: 'Notable' };
 
 const PARK_MEDIA = {
   'san-joaquin-wildlife-sanctuary': {
-    image: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/San_Joaquin_Wildlife_Sanctuary_sunset.jpg',
+    image: '/images/optimized/san-joaquin-wildlife-sanctuary-sunset-15fae096-800.webp',
     credit: 'David Eppstein',
     license: 'CC BY-SA 3.0',
     date: '12/02'
   },
   'upper-newport-bay': {
-    image: 'https://upload.wikimedia.org/wikipedia/commons/6/69/Upper_Newport_Bay.jpg',
+    image: '/images/optimized/upper-newport-bay-7f2ae943-800.webp',
     credit: 'Basar',
     license: 'CC BY-SA 3.0',
     date: '07/08'
   },
   'bolsa-chica-ecological-reserve': {
-    image: 'https://upload.wikimedia.org/wikipedia/commons/6/61/Bolsa_Chica_Ecological_Reserve_from_3%2C500_ft.%2C_view_to_the_north.jpg',
+    image: '/images/optimized/bolsa-chica-ecological-reserve-from-3-500-ft-view-to-the-north-1e9ab406-800.webp',
     credit: 'Eric Shalov',
     license: 'CC BY-SA 4.0',
     date: '05/19'
   },
   'chino-hills-state-park': {
-    image: 'https://upload.wikimedia.org/wikipedia/commons/7/73/Bane_Canyon_Chino_Hills_State_Park.jpg',
+    image: '/images/optimized/bane-canyon-chino-hills-state-park-4e0b8fe3-800.webp',
     credit: 'Blervis',
     license: 'CC0',
     date: '01/24'
   },
   'prado-wetlands': {
-    image: 'https://upload.wikimedia.org/wikipedia/commons/0/05/Pradopark.jpg',
+    image: '/images/optimized/pradopark-4923fa62-800.webp',
     credit: 'DylanMoz49',
     license: 'CC BY-SA 4.0',
     date: '03/18'
   },
   'yorba-regional-park': {
-    image: 'https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2c/a3/84/8e/it-s-best-place-for-graduation.jpg?w=1100&h=-1&s=1',
+    image: '/images/optimized/it-s-best-place-for-graduation-fd5b0ed3-800.webp',
     credit: 'Anmar A (Tripadvisor)',
     license: 'Not specified',
     date: '06/24'
   },
   'peters-canyon': {
-    image: 'https://upload.wikimedia.org/wikipedia/commons/3/31/Peters_Canyon_Regional_Park_06.JPG',
+    image: '/images/optimized/peters-canyon-regional-park-06-4933420a-800.webp',
     credit: 'Nandaro',
     license: 'CC BY-SA 3.0',
     date: '02/14'
   },
   'carbon-canyon': {
-    image: 'https://upload.wikimedia.org/wikipedia/commons/1/1c/Carbon_Canyon_Regional_Park_horse_trail.jpg',
+    image: '/images/optimized/carbon-canyon-regional-park-horse-trail-050db4d3-800.webp',
     credit: 'David Lofink',
     license: 'CC BY 2.0',
     date: '04/09'
   },
   'santiago-oaks': {
-    image: 'https://www.ocparks.com/sites/ocparks/files/styles/landscape_1120/public/2021-05/Santiago%20Oaks%20SAOA%201110%20x%20830.jpg?h=a3ab28e2&itok=7Qk24tDv',
+    image: '/images/optimized/santiago-oaks-saoa-1110-x-830-c9571cf3-800.webp',
     credit: 'OC Parks',
     license: 'Not specified',
     date: ''
   },
   'irvine-regional-park': {
-    image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Irvine%20Regional%20Park%20in%20December.jpg',
+    image: '/images/optimized/irvine-regional-park-in-december-4613c881-800.webp',
     credit: 'Cbeekman',
     license: 'CC BY-SA 3.0',
     date: '12/12'
   },
   'oak-canyon-nature-center': {
-    image: 'https://upload.wikimedia.org/wikipedia/commons/f/f2/Oak_Canyon_Nature_Center_Interpretive_Center.jpg',
+    image: '/images/optimized/oak-canyon-nature-center-interpretive-center-8c766f00-800.webp',
     credit: 'DarkNight0917',
     license: 'CC BY-SA 4.0',
     date: '07/22'
   },
   'craig-regional-park': {
-    image: 'https://discoverlamirada.com/wp-content/uploads/2017/08/craigpark5.jpg',
+    image: '/images/optimized/craigpark5-7569fd59-800.webp',
     credit: "Let's Go Outside",
     license: 'Not specified',
     date: ''
@@ -769,7 +811,7 @@ function parkCard(park) {
   ].filter(Boolean).join(' • ');
 
   return `<a href="#park/${park.id}" class="park-card fade-in" aria-label="Learn about ${park.name}">
-    ${media.image ? `<div class="park-card-img" data-name="${park.name}"><img referrerpolicy="strict-origin-when-cross-origin" data-src="${media.image}" alt="${park.name}" loading="lazy" decoding="async" width="400" height="300" onerror="this.parentElement.classList.add('img-error');this.dataset.error='true'"></div>` : ''}
+    ${media.image ? `<div class="park-card-img" data-name="${park.name}"><img referrerpolicy="strict-origin-when-cross-origin" ${deferredImageAttrs(media.image, '(max-width: 640px) 100vw, (max-width: 1200px) 33vw, 400px')} alt="${park.name}" width="400" height="300" onerror="this.parentElement.classList.add('img-error');this.dataset.error='true'"></div>` : ''}
     <div class="park-card-content">
       <span class="badge ${PARK_TIER_COLORS[park.tier]} tier-badge">Tier ${park.tier} — ${PARK_TIER_LABELS[park.tier]}</span>
       <h3>${park.name}</h3>
@@ -982,7 +1024,7 @@ function renderWildlifeDetail(el, id) {
     <div class="detail-page fade-in">
       <a href="#wildlife" class="back-link">← Back to Wildlife</a>
       <div class="detail-hero">
-        <img referrerpolicy="strict-origin-when-cross-origin" data-src="${w.image}" alt="${w.name}" onerror="this.parentElement.classList.add('img-error');this.parentElement.dataset.name='${w.name}';this.dataset.error='true'">
+        <img referrerpolicy="strict-origin-when-cross-origin" ${deferredImageAttrs(w.image, '(max-width: 768px) 100vw, 960px', 'high')} ${imageDimensionAttrs(w.image)} alt="${w.name}" onerror="this.parentElement.classList.add('img-error');this.parentElement.dataset.name='${w.name}';this.dataset.error='true'">
       </div>
       <div class="detail-hero-caption">
         <h1>${w.name}</h1>
@@ -1054,7 +1096,7 @@ function renderParkDetail(el, id) {
   el.innerHTML = `
     <div class="detail-page fade-in">
       <a href="#parks" class="back-link">← Back to Parks</a>
-      ${media.image ? `<div class="detail-hero"><img referrerpolicy="strict-origin-when-cross-origin" data-src="${media.image}" alt="${park.name}" onerror="this.parentElement.classList.add('img-error');this.parentElement.dataset.name='${park.name}';this.dataset.error='true'"></div>
+      ${media.image ? `<div class="detail-hero"><img referrerpolicy="strict-origin-when-cross-origin" ${deferredImageAttrs(media.image, '(max-width: 768px) 100vw, 960px', 'high')} ${imageDimensionAttrs(media.image)} alt="${park.name}" onerror="this.parentElement.classList.add('img-error');this.parentElement.dataset.name='${park.name}';this.dataset.error='true'"></div>
       ${detailPhotoMeta ? `<p class="detail-photo-meta">${detailPhotoMeta}</p>` : ''}` : ''}
       <h1 style="font-family:var(--font-display);font-size:var(--text-2xl);margin-bottom:var(--space-2)">${park.name}</h1>
       <p style="color:var(--color-text-muted);font-size:var(--text-lg);margin-bottom:var(--space-4)">${park.location} — ${park.distance}</p>
@@ -1536,7 +1578,7 @@ function renderAbout(el) {
 // - observe the rest and swap in src when they near the viewport
 // This avoids the current "refresh to see images" behavior while still
 // keeping the page reasonably light.
-const IMG_EAGER_COUNT = 4;
+const IMG_EAGER_COUNT = 0;
 const MAX_CONCURRENT_IMAGE_LOADS = 4;
 
 const imageLoadQueue = [];
@@ -1565,6 +1607,7 @@ function processImageLoadQueue() {
     activeImageLoads += 1;
     img.loading = next.priority === 'high' ? 'eager' : 'lazy';
     try { img.fetchPriority = next.priority; } catch (e) {}
+    if (img.dataset.srcset) img.srcset = img.dataset.srcset;
     img.src = img.dataset.src;
   }
 }
@@ -1636,8 +1679,10 @@ function activateLazyImages() {
     const rect = img.getBoundingClientRect();
     const nearViewport = rect.top < window.innerHeight + 500 && rect.bottom > -500;
 
-    if (index < IMG_EAGER_COUNT || nearViewport) {
+    if (img.dataset.priority === 'high') {
       loadImage(img, 'high');
+    } else if (index < IMG_EAGER_COUNT || nearViewport) {
+      loadImage(img, 'auto');
     } else {
       imgObserver.observe(img);
     }
