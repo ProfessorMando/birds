@@ -11,7 +11,7 @@ const SECURITY_HEADERS = {
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline'",
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: https://upload.wikimedia.org",
+    "img-src 'self' data:",
     "font-src 'self'",
     "connect-src 'self'",
     "object-src 'none'",

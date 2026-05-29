@@ -203,7 +203,9 @@ function imageDimensionAttrs(url, fallbackWidth = 960, fallbackHeight = 640) {
 function imageSrcSet(url) {
   if (!url || !url.endsWith('-800.webp')) return '';
   return [400, 800, 1200]
-    .map((width) => `${url.replace('-800.webp', `-${width}.webp`)} ${width}w`)
+    .map((width) => url.replace('-800.webp', `-${width}.webp`))
+    .filter((candidate) => candidate === url || IMAGE_DIMENSIONS[candidate])
+    .map((candidate) => `${candidate} ${IMAGE_DIMENSIONS[candidate]?.[0] || 800}w`)
     .join(', ');
 }
 
@@ -1024,7 +1026,7 @@ function renderWildlifeDetail(el, id) {
     <div class="detail-page fade-in">
       <a href="#wildlife" class="back-link">← Back to Wildlife</a>
       <div class="detail-hero">
-        <img referrerpolicy="strict-origin-when-cross-origin" ${deferredImageAttrs(w.image, '(max-width: 768px) 100vw, 960px', 'high')} ${imageDimensionAttrs(w.image)} alt="${w.name}" onerror="this.parentElement.classList.add('img-error');this.parentElement.dataset.name='${w.name}';this.dataset.error='true'">
+        <img referrerpolicy="strict-origin-when-cross-origin" ${imageAttrs(w.image, '(max-width: 768px) 100vw, 960px', 'high')} ${imageDimensionAttrs(w.image)} alt="${w.name}" onerror="this.parentElement.classList.add('img-error');this.parentElement.dataset.name='${w.name}';this.dataset.error='true'">
       </div>
       <div class="detail-hero-caption">
         <h1>${w.name}</h1>
@@ -1096,7 +1098,7 @@ function renderParkDetail(el, id) {
   el.innerHTML = `
     <div class="detail-page fade-in">
       <a href="#parks" class="back-link">← Back to Parks</a>
-      ${media.image ? `<div class="detail-hero"><img referrerpolicy="strict-origin-when-cross-origin" ${deferredImageAttrs(media.image, '(max-width: 768px) 100vw, 960px', 'high')} ${imageDimensionAttrs(media.image)} alt="${park.name}" onerror="this.parentElement.classList.add('img-error');this.parentElement.dataset.name='${park.name}';this.dataset.error='true'"></div>
+      ${media.image ? `<div class="detail-hero"><img referrerpolicy="strict-origin-when-cross-origin" ${imageAttrs(media.image, '(max-width: 768px) 100vw, 960px', 'high')} ${imageDimensionAttrs(media.image)} alt="${park.name}" onerror="this.parentElement.classList.add('img-error');this.parentElement.dataset.name='${park.name}';this.dataset.error='true'"></div>
       ${detailPhotoMeta ? `<p class="detail-photo-meta">${detailPhotoMeta}</p>` : ''}` : ''}
       <h1 style="font-family:var(--font-display);font-size:var(--text-2xl);margin-bottom:var(--space-2)">${park.name}</h1>
       <p style="color:var(--color-text-muted);font-size:var(--text-lg);margin-bottom:var(--space-4)">${park.location} — ${park.distance}</p>

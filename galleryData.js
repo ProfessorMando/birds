@@ -139,7 +139,7 @@ window.BIRD_GALLERY_ADDITIONS = {
     { url: "/images/optimized/cathartes-aura-e12ec9e1-800.webp", caption: "Perched adult.", credit: "tomsaint11 / Wikimedia Commons", license: "CC BY 2.0" },
     { url: "/images/optimized/urubu-a-tete-rouge-turkey-vulture-c35fb0ab-800.webp", caption: "Perched adult.", credit: "Samuel Blanc / Wikimedia Commons", license: "CC BY-SA 3.0" },
     { url: "/images/optimized/turkey-vulture-05fc1b25-800.webp", caption: "In captivity at the San Francisco Zoo, California.", credit: "Cameron64 / Wikimedia Commons", license: "Public Domain" },
-    { url: "https://upload.wikimedia.org/wikipedia/commons/d/d2/Turkey_Vulture_by_water.jpg", caption: "By water.", credit: "Alan Walker / Wikimedia Commons", license: "CC BY 3.0" }
+    { url: "/images/optimized/turkey-vulture-by-water-alan-walker-800.webp", caption: "By water.", credit: "Alan Walker / Wikimedia Commons", license: "CC BY 3.0" }
   ],
   "peregrine-falcon": [
     { url: "/images/optimized/falco-peregrinus-nest-usfws-free-0aa4fc2c-800.webp", caption: "At nest in Alaska.", credit: "USFWS photo / Wikimedia Commons", license: "Public Domain" },
@@ -152,36 +152,36 @@ window.BIRD_GALLERY_ADDITIONS = {
     { url: "/images/optimized/american-kestrel-falco-sparverius-3399138539-a1d46129-800.webp", caption: "In Patagonia, Arizona.", credit: "Dominic Sherony / Wikimedia Commons", license: "CC BY-SA 2.0" },
     { url: "/images/optimized/falco-sparverius-san-luis-obispo-california-usa-male-8-1-34316eb2-800.webp", caption: "Male in San Luis Obispo, California.", credit: "Alan Vernon / Wikimedia Commons", license: "CC BY 2.0" },
     { url: "/images/optimized/falco-sparverius-key-west-0d6b394a-800.webp", caption: "In Key West, Florida.", credit: "Carly Lesser & Art Drauglis / Wikimedia Commons", license: "CC BY-SA 2.0" },
-    { url: "https://upload.wikimedia.org/wikipedia/commons/6/67/Falco_sparverius_Vero_Beach_Florida.jpg", caption: "In Vero Beach, Florida.", credit: "Ken Janes / Wikimedia Commons", license: "CC BY-SA 2.0" },
+    { url: "/images/optimized/falco-sparverius-vero-beach-florida-800.webp", caption: "In Vero Beach, Florida.", credit: "Ken Janes / Wikimedia Commons", license: "CC BY-SA 2.0" },
     { url: "/images/optimized/falco-sparverius-homestead-florida-0e56bc60-800.webp", caption: "In Homestead, Miami, Florida.", credit: "Shanthanu Bhardwaj / Wikimedia Commons", license: "CC BY-SA 2.0" },
     { url: "/images/optimized/american-kestrel-falco-sparverius-sparveroides-flickr-gailhampshire-66f19601-800.webp", caption: "American kestrel, subspecies sparveroides.", credit: "gailhampshire / Wikimedia Commons", license: "CC BY 2.0" },
     { url: "/images/optimized/american-kestrel-falco-sparverius-tropicalis-female-in-flight-cayo-2eec75bb-800.webp", caption: "Female in flight near San Ignacio, Cayo Department, Belize.", credit: "Charles J. Sharp / Wikimedia Commons", license: "CC BY-SA 4.0" }
   ],
   "burrowing-owl": [
-    { url: "https://upload.wikimedia.org/wikipedia/commons/7/7f/LECHUCITA_DE_CAMPO_Athene_cunicularia_Dario_Niz.jpg", caption: "Perched adult in Uruguay.", credit: "Dario Niz / Wikimedia Commons", license: "CC BY 3.0" },
+    { url: "/images/optimized/lechucita-de-campo-athene-cunicularia-dario-niz-800.webp", caption: "Perched adult in Uruguay.", credit: "Dario Niz / Wikimedia Commons", license: "CC BY 3.0" },
     { url: "/images/optimized/athene-cunicularia-3-60c9057d-800.webp", caption: "Perched adult in Argentina.", credit: "Evelyn Proimos / Wikimedia Commons", license: "CC BY 2.0" },
     { url: "/images/optimized/athene-cunicularia-near-goiania-goias-brazil-8-352feedb-800.webp", caption: "Near Goiânia, Goiás, Brazil.", credit: "Wagner Machado Carlos Lemes / Wikimedia Commons", license: "CC BY 2.0" },
     { url: "/images/optimized/flickr-dario-sanches-coruja-buraqueira-athene-cunicularia-2-d3044a91-800.webp", caption: "Near Registro, Brazil.", credit: "Dario Sanches / Wikimedia Commons", license: "CC BY-SA 2.0" },
     { url: "/images/optimized/flickr-dario-sanches-coruja-buraqueira-athene-cunicularia-febb502e-800.webp", caption: "Near Piraju/Sarutaiá, São Paulo, Brazil.", credit: "Dario Sanches / Wikimedia Commons", license: "CC BY-SA 2.0" },
     { url: "/images/optimized/flickr-dario-sanches-coruja-buraqueira-filhote-athene-cunicularia-d129c97a-800.webp", caption: "Nestling near Registro, Brazil.", credit: "Dario Sanches / Wikimedia Commons", license: "CC BY-SA 2.0" },
     { url: "/images/optimized/7005-poussins-2-19036b1b-800.webp", caption: "Fledglings in Apure State, Venezuela.", credit: "Berrucomons / Wikimedia Commons", license: "CC BY-SA 3.0" },
-    { url: "https://upload.wikimedia.org/wikipedia/commons/f/f9/Female_Burrowing_Owl_and_Owlet_%28Athene_cunicularia%29.jpg", caption: "Female with food for chick in Fresno, California.", credit: "Kevin Cole / Wikimedia Commons", license: "CC BY 2.0" },
+    { url: "/images/optimized/female-burrowing-owl-and-owlet-athene-cunicularia-800.webp", caption: "Female with food for chick in Fresno, California.", credit: "Kevin Cole / Wikimedia Commons", license: "CC BY 2.0" },
     { url: "/images/optimized/female-burrowing-owl-feeding-owlet-athene-cunicularia-c1dc4978-800.webp", caption: "Female feeding an owlet in Fresno, California.", credit: "Kevin Cole / Wikimedia Commons", license: "CC BY 2.0" },
-    { url: "https://upload.wikimedia.org/wikipedia/commons/c/ca/Seven_Burrowing_Owlets_%28Athene_cunicularia%29.jpg", caption: "Family of chicks in Fresno, California.", credit: "Kevin Cole / Wikimedia Commons", license: "CC BY 2.0" },
+    { url: "/images/optimized/seven-burrowing-owlets-athene-cunicularia-800.webp", caption: "Family of chicks in Fresno, California.", credit: "Kevin Cole / Wikimedia Commons", license: "CC BY 2.0" },
     { url: "/images/optimized/burrowing-owl3-9636037a-800.webp", caption: "Perched adult in Ashland, Nebraska.", credit: "MONGO / Wikimedia Commons", license: "Public Domain" }
   ],
   "great-blue-heron": [
     { url: "/images/optimized/great-blue-heron-flight-3b84b816-800.webp", caption: "Two birds in synchronous flight.", credit: "Vinc3PaulS / Wikimedia Commons", license: "CC BY-SA 4.0" },
-    { url: "https://upload.wikimedia.org/wikipedia/commons/7/7b/Ardea_herodias4.jpg", caption: "At Morro Strand State Beach, Morro Bay, California.", credit: "Mike Michael L. Baird / Wikimedia Commons", license: "CC BY 2.0" },
+    { url: "/images/optimized/ardea-herodias4-morro-strand-800.webp", caption: "At Morro Strand State Beach, Morro Bay, California.", credit: "Mike Michael L. Baird / Wikimedia Commons", license: "CC BY 2.0" },
     { url: "/images/optimized/great-blue-heron-in-lake-water-50c04462-800.webp", caption: "Standing in water.", credit: "M. L. Haen / Wikimedia Commons", license: "CC BY-SA 3.0" },
-    { url: "https://upload.wikimedia.org/wikipedia/commons/7/74/Great_Blue_Heron-27527-2.jpg", caption: "In the brush at Merritt Island, Florida.", credit: "Ken Thomas / Wikimedia Commons", license: "Public Domain" },
+    { url: "/images/optimized/great-blue-heron-27527-2-800.webp", caption: "In the brush at Merritt Island, Florida.", credit: "Ken Thomas / Wikimedia Commons", license: "Public Domain" },
     { url: "/images/optimized/le-grand-heron-59e0002a-800.webp", caption: "Juvenile fishing.", credit: "I, Acarpentier / Wikimedia Commons", license: "CC BY 3.0" }
   ],
   "snowy-egret": [
     { url: "/images/optimized/egretta-thula-at-las-gallinas-wildlife-ponds-12e0adbe-800.webp", caption: "At Las Gallinas Wildlife Ponds near San Rafael, California.", credit: "Frank Schulenburg / Wikimedia Commons", license: "CC BY-SA 3.0" },
     { url: "/images/optimized/egretta-thula-searching-for-prey-in-the-strawberry-marshes-908e9954-800.webp", caption: "Searching for prey in the Strawberry marshes.", credit: "Frank Schulenburg / Wikimedia Commons", license: "CC BY-SA 4.0" },
     { url: "/images/optimized/egretta-thula1-3b982011-800.webp", caption: "Perched adult.", credit: "David Hall / Wikimedia Commons", license: "Public Domain" },
-    { url: "https://upload.wikimedia.org/wikipedia/commons/2/21/Mr._Sophisticate_-_Flickr_-_Andrea_Westmoreland.jpg", caption: "Yellow feet.", credit: "Andrea Westmoreland / Wikimedia Commons", license: "CC BY-SA 2.0" }
+    { url: "/images/optimized/mr-sophisticate-flickr-andrea-westmoreland-800.webp", caption: "Yellow feet.", credit: "Andrea Westmoreland / Wikimedia Commons", license: "CC BY-SA 2.0" }
   ],
   "great-egret": [
     { url: "/images/optimized/great-egret-ardea-alba-6de98834-800.webp", caption: "Perched adult.", credit: "Andreas Trepte / Wikimedia Commons", license: "CC BY-SA 2.5" },
@@ -228,7 +228,7 @@ window.BIRD_GALLERY_ADDITIONS = {
     { url: "/images/optimized/allen-s-hummingbird-3eab8611-800.webp", caption: "Adult perched.", credit: "U.S. Fish and Wildlife Service / Wikimedia Commons", license: "Public Domain" },
     { url: "/images/optimized/selasphorus-sasin-1905-177bc7b3-800.webp", caption: "Historical illustration from 1905.", credit: "Birds and nature / Wikimedia Commons", license: "Public Domain" },
     { url: "/images/optimized/selasphorus-sasin01-45b3da14-800.webp", caption: "Female.", credit: "Asicnewbie / Wikimedia Commons", license: "CC BY-SA 3.0" },
-    { url: "https://upload.wikimedia.org/wikipedia/commons/f/fb/Selasphorus_sasin_distr.png", caption: "Range map.", credit: "Scops / Wikimedia Commons", license: "CC BY-SA 4.0" }
+    { url: "/images/optimized/selasphorus-sasin-distr-306.webp", caption: "Range map.", credit: "Scops / Wikimedia Commons", license: "CC BY-SA 4.0" }
   ],
   "costas-hummingbird": [
     { url: "/images/optimized/hummingbird-9a2548da-800.webp", caption: "Adult portrait.", credit: "San Diego Zoo / Wikimedia Commons", license: "Public Domain" },
