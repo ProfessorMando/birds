@@ -1,3 +1,5 @@
+import { buildRssFeed } from './rss.js';
+
 const VALID_DETAIL_KINDS = new Set(['bird', 'wildlife', 'park']);
 
 const SECURITY_HEADERS = {
@@ -54,6 +56,15 @@ export default {
       const id = env.DETAIL_COUNTER.idFromName('global');
       const stub = env.DETAIL_COUNTER.get(id);
       return withSecurityHeaders(await stub.fetch(request), request);
+    }
+
+    if (url.pathname === '/feed.xml') {
+      return withSecurityHeaders(new Response(buildRssFeed(), {
+        headers: {
+          'Content-Type': 'application/rss+xml; charset=utf-8',
+          'Cache-Control': 'public, max-age=300'
+        }
+      }), request);
     }
 
     return withSecurityHeaders(await env.ASSETS.fetch(request), request);

@@ -1,0 +1,7 @@
+{
+  "type": "module",
+  "scripts": {
+    "validate:feed": "node scripts/validate-feed.js",
+    "build": "node scripts/validate-feed.js"
+  }
+}

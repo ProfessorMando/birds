@@ -9,3 +9,7 @@ README.md
 .wrangler/**
 wrangler.toml
 worker.js
+package.json
+scripts
+scripts/**
+rss.js
