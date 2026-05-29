@@ -1468,12 +1468,19 @@ function buildQuizPerformanceMessage(scorePct, averageScore) {
 
 function renderSearch(el) {
   el.innerHTML = `
-    <div class="section-header" style="text-align:center"><h2>Search</h2><p>Find birds, wildlife, and parks with fast fuzzy matching</p></div>
-    <div class="search-input-wrap">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input type="search" id="search-input" placeholder="Try hummingbird, humingbird, raptor, oak..." aria-label="Search birds, wildlife, parks, habitats, and traits" oninput="scheduleSearch()" autocomplete="off" autofocus>
-    </div>
-    <div id="search-results" aria-live="polite"><div class="empty-state"><p>Type at least 2 characters to search</p></div></div>`;
+    <section class="page-container search-page" aria-labelledby="search-title">
+      <div class="section-header search-header">
+        <h2 id="search-title">Search</h2>
+        <p>Find birds, wildlife, and parks with fast fuzzy matching</p>
+      </div>
+      <div class="search-panel">
+        <div class="search-input-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="search" id="search-input" placeholder="Try hummingbird, humingbird, raptor, oak..." aria-label="Search birds, wildlife, parks, habitats, and traits" oninput="scheduleSearch()" autocomplete="off" autofocus>
+        </div>
+        <div id="search-results" class="search-results" aria-live="polite"><div class="empty-state"><p>Type at least 2 characters to search</p></div></div>
+      </div>
+    </section>`;
 
   requestAnimationFrame(() => document.getElementById('search-input')?.focus());
 }
