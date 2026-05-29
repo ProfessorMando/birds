@@ -489,22 +489,151 @@ const BIRD_THUMBNAIL_ADJUSTMENTS = {
   'double-crested-cormorant': { frame: '4 / 4', fit: 'contain', position: 'center top' },
   'black-necked-stilt': { frame: '4 / 5', fit: 'contain', position: 'center top' }
 };
-const SEARCH_INDEX = {
-  birds: BIRDS.map((bird) => ({
+const SEARCH_ITEMS = [
+  ...BIRDS.map((bird) => ({
+    type: 'birds',
     item: bird,
-    haystack: [bird.name, bird.scientific, bird.group, ...bird.habitat].join(' ').toLowerCase()
+    title: bird.name,
+    subtitle: bird.scientific,
+    category: bird.group,
+    tags: [bird.group, bird.status, bird.encounter, bird.season, ...bird.habitat, ...(bird.localParks || [])].join(' '),
+    text: [
+      bird.name, bird.scientific, bird.group, bird.status, bird.encounter, bird.season,
+      ...(bird.habitat || []), ...(bird.localParks || []), bird.size, bird.diet,
+      bird.voice, bird.fieldMarks, bird.behavior, bird.similar, bird.localNotes
+    ].filter(Boolean).join(' ')
   })),
-  wildlife: WILDLIFE.map((wildlife) => ({
+  ...WILDLIFE.map((wildlife) => ({
+    type: 'wildlife',
     item: wildlife,
-    haystack: [wildlife.name, wildlife.scientific, wildlifeHabitatCategory(wildlife), wildlifeDietCategory(wildlife)].join(' ').toLowerCase()
+    title: wildlife.name,
+    subtitle: wildlife.scientific,
+    category: wildlife.type,
+    tags: [wildlife.type, wildlife.status, wildlifeHabitatCategory(wildlife), wildlifeDietCategory(wildlife)].join(' '),
+    text: [
+      wildlife.name, wildlife.scientific, wildlife.type, wildlife.status, wildlife.size,
+      wildlifeHabitatCategory(wildlife), wildlifeDietCategory(wildlife), wildlife.habitat,
+      wildlife.identification, wildlife.ecologicalRole, wildlife.birdRelationship
+    ].filter(Boolean).join(' ')
   })),
-  parks: PARKS.map((park) => ({
+  ...PARKS.map((park) => ({
+    type: 'parks',
     item: park,
-    haystack: [park.name, park.location, park.habitat].join(' ').toLowerCase()
+    title: park.name,
+    subtitle: park.location,
+    category: park.habitat,
+    tags: [park.location, park.habitat, ...(park.highlights || [])].join(' '),
+    text: [park.name, park.location, park.habitat, park.description, ...(park.highlights || []), ...(park.birds || [])].filter(Boolean).join(' ')
   }))
-};
+];
 
 let searchDebounceTimer = null;
+let fuseSearch = null;
+
+
+function normalizeSearchValue(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
+
+function escapeHtml(value) {
+  return String(value || '').replace(/[&<>"']/g, (char) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[char]));
+}
+
+function getFuseSearch() {
+  if (fuseSearch || typeof window.Fuse !== 'function') return fuseSearch;
+
+  fuseSearch = new window.Fuse(SEARCH_ITEMS, {
+    includeScore: true,
+    ignoreLocation: true,
+    minMatchCharLength: 2,
+    shouldSort: true,
+    threshold: 0.36,
+    keys: [
+      { name: 'title', weight: 0.42 },
+      { name: 'category', weight: 0.28 },
+      { name: 'tags', weight: 0.2 },
+      { name: 'subtitle', weight: 0.06 },
+      { name: 'text', weight: 0.04 }
+    ]
+  });
+
+  return fuseSearch;
+}
+
+function searchItems(query) {
+  const normalizedQuery = normalizeSearchValue(query);
+  if (!normalizedQuery || normalizedQuery.length < 2) return [];
+
+  const fuse = getFuseSearch();
+  if (fuse) {
+    return fuse.search(normalizedQuery).map((result) => result.item);
+  }
+
+  return SEARCH_ITEMS
+    .map((entry) => ({ entry, score: scoreSearchEntry(entry, normalizedQuery) }))
+    .filter((result) => result.score > 0)
+    .sort((a, b) => b.score - a.score || a.entry.title.localeCompare(b.entry.title))
+    .map((result) => result.entry);
+}
+
+function scoreSearchEntry(entry, query) {
+  const title = normalizeSearchValue(entry.title);
+  const category = normalizeSearchValue(entry.category);
+  const tags = normalizeSearchValue(entry.tags);
+  const text = normalizeSearchValue(entry.text);
+  const queryTokens = query.split(/\s+/).filter(Boolean);
+  let score = 0;
+
+  if (title === query) score += 120;
+  if (title.includes(query)) score += 80;
+  if (category === query) score += 90;
+  if (category.includes(query)) score += 70;
+  if (tags.includes(query)) score += 55;
+  if (text.includes(query)) score += 35;
+
+  queryTokens.forEach((token) => {
+    if (title.includes(token)) score += 28;
+    if (category.includes(token)) score += 26;
+    if (tags.includes(token)) score += 18;
+    if (text.includes(token)) score += 8;
+    if (isFuzzyTokenMatch(token, [title, category, tags])) score += 12;
+  });
+
+  return score;
+}
+
+function isFuzzyTokenMatch(queryToken, fields) {
+  if (queryToken.length < 4) return false;
+  return fields.some((field) => field.split(/[^a-z0-9]+/).some((word) => {
+    if (word.length < 4) return false;
+    return word.includes(queryToken) || queryToken.includes(word) || isSubsequence(queryToken, word);
+  }));
+}
+
+function isSubsequence(needle, haystack) {
+  let needleIndex = 0;
+  for (let haystackIndex = 0; haystackIndex < haystack.length && needleIndex < needle.length; haystackIndex += 1) {
+    if (needle[needleIndex] === haystack[haystackIndex]) needleIndex += 1;
+  }
+  return needleIndex === needle.length;
+}
+
+function groupSearchResults(matches) {
+  return matches.reduce((groups, match) => {
+    groups[match.type].push(match.item);
+    return groups;
+  }, { birds: [], wildlife: [], parks: [] });
+}
 
 function getBirdDirectoryList() {
   const byId = new Map(BIRDS.map(b => [b.id, b]));
@@ -1295,51 +1424,55 @@ function buildQuizPerformanceMessage(scorePct, averageScore) {
 
 function renderSearch(el) {
   el.innerHTML = `
-    <div class="section-header" style="text-align:center"><h2>Search</h2><p>Find birds, wildlife, and parks</p></div>
+    <div class="section-header" style="text-align:center"><h2>Search</h2><p>Find birds, wildlife, and parks with fast fuzzy matching</p></div>
     <div class="search-input-wrap">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input type="search" id="search-input" placeholder="Search species, parks, habitats..." aria-label="Search" oninput="scheduleSearch()" autofocus>
+      <input type="search" id="search-input" placeholder="Try hummingbird, humingbird, raptor, oak..." aria-label="Search birds, wildlife, parks, habitats, and traits" oninput="scheduleSearch()" autocomplete="off" autofocus>
     </div>
-    <div id="search-results"></div>`;
+    <div id="search-results" aria-live="polite"><div class="empty-state"><p>Type at least 2 characters to search</p></div></div>`;
+
+  requestAnimationFrame(() => document.getElementById('search-input')?.focus());
 }
 
 window.scheduleSearch = function() {
   if (searchDebounceTimer) window.clearTimeout(searchDebounceTimer);
   searchDebounceTimer = window.setTimeout(() => {
     window.doSearch();
-  }, 120);
+  }, 75);
 };
 
 window.doSearch = function() {
-  const q = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
+  const q = document.getElementById('search-input')?.value || '';
   const results = document.getElementById('search-results');
   if (!results) return;
 
-  if (!q || q.length < 2) {
+  if (normalizeSearchValue(q).length < 2) {
     results.innerHTML = '<div class="empty-state"><p>Type at least 2 characters to search</p></div>';
     return;
   }
 
-  const matchBirds = SEARCH_INDEX.birds.filter((entry) => entry.haystack.includes(q)).map((entry) => entry.item);
-  const matchWildlife = SEARCH_INDEX.wildlife.filter((entry) => entry.haystack.includes(q)).map((entry) => entry.item);
-  const matchParks = SEARCH_INDEX.parks.filter((entry) => entry.haystack.includes(q)).map((entry) => entry.item);
+  const matches = groupSearchResults(searchItems(q));
+  const totalMatches = matches.birds.length + matches.wildlife.length + matches.parks.length;
 
   let html = '';
-  if (matchBirds.length) {
-    html += `<h3 style="font-family:var(--font-display);margin:var(--space-4) 0 var(--space-3);color:var(--color-primary)">Birds (${matchBirds.length})</h3>`;
-    html += `<div class="card-grid">${matchBirds.map(b => birdCard(b)).join('')}</div>`;
+  if (totalMatches) {
+    html += `<p class="search-summary">${totalMatches} result${totalMatches === 1 ? '' : 's'} for <strong>${escapeHtml(q.trim())}</strong></p>`;
   }
-  if (matchWildlife.length) {
-    html += `<h3 style="font-family:var(--font-display);margin:var(--space-6) 0 var(--space-3);color:var(--color-primary)">Wildlife (${matchWildlife.length})</h3>`;
-    html += `<div class="card-grid">${matchWildlife.map(w => wildlifeCard(w)).join('')}</div>`;
+  if (matches.birds.length) {
+    html += `<h3 class="search-results-heading">Birds (${matches.birds.length})</h3>`;
+    html += `<div class="card-grid">${matches.birds.map(b => birdCard(b)).join('')}</div>`;
   }
-  if (matchParks.length) {
-    html += `<h3 style="font-family:var(--font-display);margin:var(--space-6) 0 var(--space-3);color:var(--color-primary)">Parks (${matchParks.length})</h3>`;
-    html += `<div class="card-grid">${matchParks.map(p => parkCard(p)).join('')}</div>`;
+  if (matches.wildlife.length) {
+    html += `<h3 class="search-results-heading">Wildlife (${matches.wildlife.length})</h3>`;
+    html += `<div class="card-grid">${matches.wildlife.map(w => wildlifeCard(w)).join('')}</div>`;
+  }
+  if (matches.parks.length) {
+    html += `<h3 class="search-results-heading">Parks (${matches.parks.length})</h3>`;
+    html += `<div class="card-grid">${matches.parks.map(p => parkCard(p)).join('')}</div>`;
   }
 
   if (!html) {
-    html = '<div class="empty-state"><h3>No results found</h3><p>Try a different search term</p></div>';
+    html = '<div class="empty-state"><h3>No results found</h3><p>Try a species group, habitat, park name, or a shorter search term.</p></div>';
   }
 
   results.innerHTML = html;
