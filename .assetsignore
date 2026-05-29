@@ -1,0 +1,11 @@
+# Keep repository metadata and deployment-only files out of the Workers
+# static asset upload when the asset directory is the repository root.
+.git
+.git/**
+.gitignore
+.assetsignore
+README.md
+.wrangler
+.wrangler/**
+wrangler.toml
+worker.js
