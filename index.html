@@ -7,17 +7,12 @@
 <title>Birds of Yorba Linda — Wildlife Guide</title>
 <meta name="description" content="An educational guide to birds and wildlife in Yorba Linda, California. Discover over 40 bird species, local parks, and wildlife in the Chino Hills area.">
 
-<!-- Fonts -->
-<link rel="preconnect" href="https://api.fontshare.com">
-<link href="https://api.fontshare.com/v2/css?f[]=zodiak@400,500,600,700&display=swap" rel="stylesheet">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
+<link rel="alternate" type="application/rss+xml" title="Birds of Yorba Linda — Rare Sightings & Field Notes" href="https://birds.friendofgrogu.workers.dev/feed.xml">
 <link rel="stylesheet" href="./base.css">
 <link rel="stylesheet" href="./style.css">
 </head>
 <body>
+<div class="app-shell">
 
 <!-- Skip Link -->
 <a href="#main-content" class="skip-link">Skip to content</a>
@@ -43,6 +38,7 @@
       <a href="#rare">Rare</a>
       <a href="#learn">Learn</a>
       <a href="#quiz">Quiz</a>
+      <a href="#search">Search</a>
       <a href="#about">About</a>
     </nav>
 
@@ -72,21 +68,22 @@
 <footer class="site-footer" role="contentinfo">
   <div class="footer-inner">
     <div class="footer-col">
-      <h4>Explore</h4>
+      <p class="footer-heading">Explore</p>
       <a href="#birds">Bird Directory</a>
       <a href="#wildlife">Other Wildlife</a>
       <a href="#parks">Parks & Hotspots</a>
       <a href="#rare">Rare Sightings</a>
+      <a href="/feed.xml">RSS Feed</a>
     </div>
     <div class="footer-col">
-      <h4>Learn</h4>
+      <p class="footer-heading">Learn</p>
       <a href="#learn">Birding Basics</a>
       <a href="#quiz">Take a Quiz</a>
       <a href="#about">About This Site</a>
       <a href="#search">Search</a>
     </div>
     <div class="footer-col">
-      <h4>Sources</h4>
+      <p class="footer-heading">Sources</p>
       <a href="https://ebird.org/region/US-CA-059/bird-list" target="_blank" rel="noopener noreferrer">eBird — Orange County</a>
       <a href="https://seaandsageaudubon.org/" target="_blank" rel="noopener noreferrer">Sea and Sage Audubon</a>
       <a href="https://www.allaboutbirds.org/" target="_blank" rel="noopener noreferrer">All About Birds</a>
@@ -100,6 +97,9 @@
 
 <script src="./data.js" defer></script>
 <script src="./galleryData.js" defer></script>
+<script src="./imageDimensions.js" defer></script>
+<script src="./vendor/fuse.min.js" defer></script>
 <script src="./app.js" defer></script>
+</div>
 </body>
 </html>

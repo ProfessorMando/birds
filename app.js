@@ -9,7 +9,6 @@ let quizGlobalStats = { completions: 0, averageScore: 0 };
 const THEME_STORAGE_KEY = 'themePreference';
 const QUIZ_HISTORY_STORAGE_KEY = 'quizHistory';
 const UPVOTE_USER_STORAGE_KEY = 'upvoteUserId';
-let GOOGLE_MAPS_EMBED_API_KEY = '';
 
 // ===== INIT =====
 function init() {
@@ -26,8 +25,6 @@ function init() {
   // Router
   window.addEventListener('hashchange', onRoute);
   onRoute();
-
-  loadRuntimeConfig();
 }
 
 // ===== THEME TOGGLE =====
@@ -107,18 +104,6 @@ function onRoute() {
   }
 
   requestAnimationFrame(activateLazyImages);
-}
-
-async function loadRuntimeConfig() {
-  try {
-    const response = await fetch('/api/config');
-    if (!response.ok) return;
-    const config = await response.json();
-    GOOGLE_MAPS_EMBED_API_KEY = (config && config.g_map_key) ? config.g_map_key : '';
-    if ((window.location.hash || '#home').startsWith('#park/')) onRoute();
-  } catch (error) {
-    GOOGLE_MAPS_EMBED_API_KEY = '';
-  }
 }
 
 // ===== HELPERS =====
@@ -207,6 +192,47 @@ function wildlifeRarityBadge(status) {
   return map[status] || 'badge-earth';
 }
 
+
+const IMAGE_DIMENSIONS = window.IMAGE_DIMENSIONS || {};
+
+function imageDimensionAttrs(url, fallbackWidth = 960, fallbackHeight = 640) {
+  const dimensions = IMAGE_DIMENSIONS[url] || [fallbackWidth, fallbackHeight];
+  return `width="${dimensions[0]}" height="${dimensions[1]}"`;
+}
+
+function imageSrcSet(url) {
+  if (!url || !url.endsWith('-800.webp')) return '';
+  return [400, 800, 1200]
+    .map((width) => url.replace('-800.webp', `-${width}.webp`))
+    .filter((candidate) => candidate === url || IMAGE_DIMENSIONS[candidate])
+    .map((candidate) => `${candidate} ${IMAGE_DIMENSIONS[candidate]?.[0] || 800}w`)
+    .join(', ');
+}
+
+function imageAttrs(url, sizes, priority = 'auto') {
+  const srcset = imageSrcSet(url);
+  const attrs = [
+    `src="${url}"`,
+    srcset ? `srcset="${srcset}"` : '',
+    `sizes="${sizes}"`,
+    'decoding="async"',
+    priority === 'high' ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"'
+  ];
+  return attrs.filter(Boolean).join(' ');
+}
+
+function deferredImageAttrs(url, sizes, priority = 'auto') {
+  const srcset = imageSrcSet(url);
+  const attrs = [
+    `data-src="${url}"`,
+    srcset ? `data-srcset="${srcset}"` : '',
+    `sizes="${sizes}"`,
+    'decoding="async"',
+    priority === 'high' ? 'loading="eager" fetchpriority="high" data-priority="high"' : 'loading="lazy"'
+  ];
+  return attrs.filter(Boolean).join(' ');
+}
+
 function getBirdGalleryImages(bird) {
   const additions = (window.BIRD_GALLERY_ADDITIONS && window.BIRD_GALLERY_ADDITIONS[bird.id])
     ? window.BIRD_GALLERY_ADDITIONS[bird.id]
@@ -244,13 +270,13 @@ function renderBirdGallery(images, birdName) {
 
   return `
     <div class="detail-hero gallery-hero" data-gallery-index="0" data-gallery-total="${images.length}">
-      <img id="bird-gallery-image" referrerpolicy="strict-origin-when-cross-origin" src="${heroImage.url}" alt="${birdName} — ${heroImage.caption}" onerror="this.parentElement.classList.add('img-error');this.parentElement.dataset.name='${birdName}';this.dataset.error='true'">
+      <img id="bird-gallery-image" referrerpolicy="strict-origin-when-cross-origin" ${imageAttrs(heroImage.url, '(max-width: 768px) 100vw, 960px', 'high')} ${imageDimensionAttrs(heroImage.url)} alt="${birdName} — ${heroImage.caption}" onerror="this.parentElement.classList.add('img-error');this.parentElement.dataset.name='${birdName}';this.dataset.error='true'">
       ${controls}
       ${images.length > 1 ? `<div class="gallery-counter" id="bird-gallery-counter">1 / ${images.length}</div>` : ''}
     </div>
     <div class="gallery-caption" id="bird-gallery-caption">${heroImage.caption}</div>
     <div class="gallery-credit" id="bird-gallery-credit">${heroImage.credit}${heroImage.license ? ` • ${heroImage.license}` : ''}</div>
-    ${images.length > 1 ? `<div class="gallery-thumbs">${images.map((image, index) => `<button class="gallery-thumb ${index === 0 ? 'active' : ''}" type="button" onclick="selectBirdImage(${index})" aria-label="Show image ${index + 1}: ${image.caption}"><img referrerpolicy="strict-origin-when-cross-origin" loading="lazy" src="${image.url}" alt="${birdName} thumbnail ${index + 1}"></button>`).join('')}</div>` : ''}
+    ${images.length > 1 ? `<div class="gallery-thumbs">${images.map((image, index) => `<button class="gallery-thumb ${index === 0 ? 'active' : ''}" type="button" onclick="selectBirdImage(${index})" aria-label="Show image ${index + 1}: ${image.caption}"><img referrerpolicy="strict-origin-when-cross-origin" ${imageAttrs(image.url, '82px')} width="82" height="70" alt="${birdName} thumbnail ${index + 1}"></button>`).join('')}</div>` : ''}
   `;
 }
 
@@ -269,6 +295,9 @@ function updateBirdGallery(index) {
   const counterEl = document.getElementById('bird-gallery-counter');
 
   if (imageEl) {
+    const srcset = imageSrcSet(selected.url);
+    if (srcset) imageEl.srcset = srcset;
+    else imageEl.removeAttribute('srcset');
     imageEl.src = selected.url;
     imageEl.alt = `${state.birdName} — ${selected.caption}`;
   }
@@ -504,22 +533,151 @@ const BIRD_THUMBNAIL_ADJUSTMENTS = {
   'double-crested-cormorant': { frame: '4 / 4', fit: 'contain', position: 'center top' },
   'black-necked-stilt': { frame: '4 / 5', fit: 'contain', position: 'center top' }
 };
-const SEARCH_INDEX = {
-  birds: BIRDS.map((bird) => ({
+const SEARCH_ITEMS = [
+  ...BIRDS.map((bird) => ({
+    type: 'birds',
     item: bird,
-    haystack: [bird.name, bird.scientific, bird.group, ...bird.habitat].join(' ').toLowerCase()
+    title: bird.name,
+    subtitle: bird.scientific,
+    category: bird.group,
+    tags: [bird.group, bird.status, bird.encounter, bird.season, ...bird.habitat, ...(bird.localParks || [])].join(' '),
+    text: [
+      bird.name, bird.scientific, bird.group, bird.status, bird.encounter, bird.season,
+      ...(bird.habitat || []), ...(bird.localParks || []), bird.size, bird.diet,
+      bird.voice, bird.fieldMarks, bird.behavior, bird.similar, bird.localNotes
+    ].filter(Boolean).join(' ')
   })),
-  wildlife: WILDLIFE.map((wildlife) => ({
+  ...WILDLIFE.map((wildlife) => ({
+    type: 'wildlife',
     item: wildlife,
-    haystack: [wildlife.name, wildlife.scientific, wildlifeHabitatCategory(wildlife), wildlifeDietCategory(wildlife)].join(' ').toLowerCase()
+    title: wildlife.name,
+    subtitle: wildlife.scientific,
+    category: wildlife.type,
+    tags: [wildlife.type, wildlife.status, wildlifeHabitatCategory(wildlife), wildlifeDietCategory(wildlife)].join(' '),
+    text: [
+      wildlife.name, wildlife.scientific, wildlife.type, wildlife.status, wildlife.size,
+      wildlifeHabitatCategory(wildlife), wildlifeDietCategory(wildlife), wildlife.habitat,
+      wildlife.identification, wildlife.ecologicalRole, wildlife.birdRelationship
+    ].filter(Boolean).join(' ')
   })),
-  parks: PARKS.map((park) => ({
+  ...PARKS.map((park) => ({
+    type: 'parks',
     item: park,
-    haystack: [park.name, park.location, park.habitat].join(' ').toLowerCase()
+    title: park.name,
+    subtitle: park.location,
+    category: park.habitat,
+    tags: [park.location, park.habitat, ...(park.highlights || [])].join(' '),
+    text: [park.name, park.location, park.habitat, park.description, ...(park.highlights || []), ...(park.birds || [])].filter(Boolean).join(' ')
   }))
-};
+];
 
 let searchDebounceTimer = null;
+let fuseSearch = null;
+
+
+function normalizeSearchValue(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
+
+function escapeHtml(value) {
+  return String(value || '').replace(/[&<>"']/g, (char) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[char]));
+}
+
+function getFuseSearch() {
+  if (fuseSearch || typeof window.Fuse !== 'function') return fuseSearch;
+
+  fuseSearch = new window.Fuse(SEARCH_ITEMS, {
+    includeScore: true,
+    ignoreLocation: true,
+    minMatchCharLength: 2,
+    shouldSort: true,
+    threshold: 0.36,
+    keys: [
+      { name: 'title', weight: 0.42 },
+      { name: 'category', weight: 0.28 },
+      { name: 'tags', weight: 0.2 },
+      { name: 'subtitle', weight: 0.06 },
+      { name: 'text', weight: 0.04 }
+    ]
+  });
+
+  return fuseSearch;
+}
+
+function searchItems(query) {
+  const normalizedQuery = normalizeSearchValue(query);
+  if (!normalizedQuery || normalizedQuery.length < 2) return [];
+
+  const fuse = getFuseSearch();
+  if (fuse) {
+    return fuse.search(normalizedQuery).map((result) => result.item);
+  }
+
+  return SEARCH_ITEMS
+    .map((entry) => ({ entry, score: scoreSearchEntry(entry, normalizedQuery) }))
+    .filter((result) => result.score > 0)
+    .sort((a, b) => b.score - a.score || a.entry.title.localeCompare(b.entry.title))
+    .map((result) => result.entry);
+}
+
+function scoreSearchEntry(entry, query) {
+  const title = normalizeSearchValue(entry.title);
+  const category = normalizeSearchValue(entry.category);
+  const tags = normalizeSearchValue(entry.tags);
+  const text = normalizeSearchValue(entry.text);
+  const queryTokens = query.split(/\s+/).filter(Boolean);
+  let score = 0;
+
+  if (title === query) score += 120;
+  if (title.includes(query)) score += 80;
+  if (category === query) score += 90;
+  if (category.includes(query)) score += 70;
+  if (tags.includes(query)) score += 55;
+  if (text.includes(query)) score += 35;
+
+  queryTokens.forEach((token) => {
+    if (title.includes(token)) score += 28;
+    if (category.includes(token)) score += 26;
+    if (tags.includes(token)) score += 18;
+    if (text.includes(token)) score += 8;
+    if (isFuzzyTokenMatch(token, [title, category, tags])) score += 12;
+  });
+
+  return score;
+}
+
+function isFuzzyTokenMatch(queryToken, fields) {
+  if (queryToken.length < 4) return false;
+  return fields.some((field) => field.split(/[^a-z0-9]+/).some((word) => {
+    if (word.length < 4) return false;
+    return word.includes(queryToken) || queryToken.includes(word) || isSubsequence(queryToken, word);
+  }));
+}
+
+function isSubsequence(needle, haystack) {
+  let needleIndex = 0;
+  for (let haystackIndex = 0; haystackIndex < haystack.length && needleIndex < needle.length; haystackIndex += 1) {
+    if (needle[needleIndex] === haystack[haystackIndex]) needleIndex += 1;
+  }
+  return needleIndex === needle.length;
+}
+
+function groupSearchResults(matches) {
+  return matches.reduce((groups, match) => {
+    groups[match.type].push(match.item);
+    return groups;
+  }, { birds: [], wildlife: [], parks: [] });
+}
 
 function getBirdDirectoryList() {
   const byId = new Map(BIRDS.map(b => [b.id, b]));
@@ -540,7 +698,7 @@ function birdThumbnailStyles(bird) {
 function birdCard(bird) {
   const thumbStyles = birdThumbnailStyles(bird);
   return `<a href="#bird/${bird.id}" class="species-card fade-in" aria-label="Learn about ${bird.name}">
-    <div class="species-card-img" data-name="${bird.name}"${thumbStyles.frame}><img referrerpolicy="strict-origin-when-cross-origin" data-src="${bird.image}" alt="${bird.name}" loading="lazy" decoding="async" width="400" height="300"${thumbStyles.image} onerror="this.parentElement.classList.add('img-error');this.dataset.error='true'"></div>
+    <div class="species-card-img" data-name="${bird.name}"${thumbStyles.frame}><img referrerpolicy="strict-origin-when-cross-origin" ${deferredImageAttrs(bird.image, '(max-width: 640px) 100vw, (max-width: 1200px) 33vw, 400px')} alt="${bird.name}" width="400" height="300"${thumbStyles.image} onerror="this.parentElement.classList.add('img-error');this.dataset.error='true'"></div>
     <div class="species-card-body">
       <h3>${bird.name}</h3>
       <p class="scientific">${bird.scientific}</p>
@@ -555,7 +713,7 @@ function birdCard(bird) {
 
 function wildlifeCard(w) {
   return `<a href="#wildlifeDetail/${w.id}" class="species-card fade-in" aria-label="Learn about ${w.name}">
-    <div class="species-card-img" data-name="${w.name}"><img referrerpolicy="strict-origin-when-cross-origin" data-src="${w.image}" alt="${w.name}" loading="lazy" decoding="async" width="400" height="300" onerror="this.parentElement.classList.add('img-error');this.dataset.error='true'"></div>
+    <div class="species-card-img" data-name="${w.name}"><img referrerpolicy="strict-origin-when-cross-origin" ${deferredImageAttrs(w.image, '(max-width: 640px) 100vw, (max-width: 1200px) 33vw, 400px')} alt="${w.name}" width="400" height="300" onerror="this.parentElement.classList.add('img-error');this.dataset.error='true'"></div>
     <div class="species-card-body">
       <h3>${w.name}</h3>
       <p class="scientific">${w.scientific}</p>
@@ -573,73 +731,73 @@ const PARK_TIER_LABELS = { 1: 'Must-Visit', 2: 'Important', 3: 'Notable' };
 
 const PARK_MEDIA = {
   'san-joaquin-wildlife-sanctuary': {
-    image: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/San_Joaquin_Wildlife_Sanctuary_sunset.jpg',
+    image: '/images/optimized/san-joaquin-wildlife-sanctuary-sunset-15fae096-800.webp',
     credit: 'David Eppstein',
     license: 'CC BY-SA 3.0',
     date: '12/02'
   },
   'upper-newport-bay': {
-    image: 'https://upload.wikimedia.org/wikipedia/commons/6/69/Upper_Newport_Bay.jpg',
+    image: '/images/optimized/upper-newport-bay-7f2ae943-800.webp',
     credit: 'Basar',
     license: 'CC BY-SA 3.0',
     date: '07/08'
   },
   'bolsa-chica-ecological-reserve': {
-    image: 'https://upload.wikimedia.org/wikipedia/commons/6/61/Bolsa_Chica_Ecological_Reserve_from_3%2C500_ft.%2C_view_to_the_north.jpg',
+    image: '/images/optimized/bolsa-chica-ecological-reserve-from-3-500-ft-view-to-the-north-1e9ab406-800.webp',
     credit: 'Eric Shalov',
     license: 'CC BY-SA 4.0',
     date: '05/19'
   },
   'chino-hills-state-park': {
-    image: 'https://upload.wikimedia.org/wikipedia/commons/7/73/Bane_Canyon_Chino_Hills_State_Park.jpg',
+    image: '/images/optimized/bane-canyon-chino-hills-state-park-4e0b8fe3-800.webp',
     credit: 'Blervis',
     license: 'CC0',
     date: '01/24'
   },
   'prado-wetlands': {
-    image: 'https://upload.wikimedia.org/wikipedia/commons/0/05/Pradopark.jpg',
+    image: '/images/optimized/pradopark-4923fa62-800.webp',
     credit: 'DylanMoz49',
     license: 'CC BY-SA 4.0',
     date: '03/18'
   },
   'yorba-regional-park': {
-    image: 'https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2c/a3/84/8e/it-s-best-place-for-graduation.jpg?w=1100&h=-1&s=1',
+    image: '/images/optimized/it-s-best-place-for-graduation-fd5b0ed3-800.webp',
     credit: 'Anmar A (Tripadvisor)',
     license: 'Not specified',
     date: '06/24'
   },
   'peters-canyon': {
-    image: 'https://upload.wikimedia.org/wikipedia/commons/3/31/Peters_Canyon_Regional_Park_06.JPG',
+    image: '/images/optimized/peters-canyon-regional-park-06-4933420a-800.webp',
     credit: 'Nandaro',
     license: 'CC BY-SA 3.0',
     date: '02/14'
   },
   'carbon-canyon': {
-    image: 'https://upload.wikimedia.org/wikipedia/commons/1/1c/Carbon_Canyon_Regional_Park_horse_trail.jpg',
+    image: '/images/optimized/carbon-canyon-regional-park-horse-trail-050db4d3-800.webp',
     credit: 'David Lofink',
     license: 'CC BY 2.0',
     date: '04/09'
   },
   'santiago-oaks': {
-    image: 'https://www.ocparks.com/sites/ocparks/files/styles/landscape_1120/public/2021-05/Santiago%20Oaks%20SAOA%201110%20x%20830.jpg?h=a3ab28e2&itok=7Qk24tDv',
+    image: '/images/optimized/santiago-oaks-saoa-1110-x-830-c9571cf3-800.webp',
     credit: 'OC Parks',
     license: 'Not specified',
     date: ''
   },
   'irvine-regional-park': {
-    image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Irvine%20Regional%20Park%20in%20December.jpg',
+    image: '/images/optimized/irvine-regional-park-in-december-4613c881-800.webp',
     credit: 'Cbeekman',
     license: 'CC BY-SA 3.0',
     date: '12/12'
   },
   'oak-canyon-nature-center': {
-    image: 'https://upload.wikimedia.org/wikipedia/commons/f/f2/Oak_Canyon_Nature_Center_Interpretive_Center.jpg',
+    image: '/images/optimized/oak-canyon-nature-center-interpretive-center-8c766f00-800.webp',
     credit: 'DarkNight0917',
     license: 'CC BY-SA 4.0',
     date: '07/22'
   },
   'craig-regional-park': {
-    image: 'https://discoverlamirada.com/wp-content/uploads/2017/08/craigpark5.jpg',
+    image: '/images/optimized/craigpark5-7569fd59-800.webp',
     credit: "Let's Go Outside",
     license: 'Not specified',
     date: ''
@@ -655,7 +813,7 @@ function parkCard(park) {
   ].filter(Boolean).join(' • ');
 
   return `<a href="#park/${park.id}" class="park-card fade-in" aria-label="Learn about ${park.name}">
-    ${media.image ? `<div class="park-card-img" data-name="${park.name}"><img referrerpolicy="strict-origin-when-cross-origin" data-src="${media.image}" alt="${park.name}" loading="lazy" decoding="async" width="400" height="300" onerror="this.parentElement.classList.add('img-error');this.dataset.error='true'"></div>` : ''}
+    ${media.image ? `<div class="park-card-img" data-name="${park.name}"><img referrerpolicy="strict-origin-when-cross-origin" ${deferredImageAttrs(media.image, '(max-width: 640px) 100vw, (max-width: 1200px) 33vw, 400px')} alt="${park.name}" width="400" height="300" onerror="this.parentElement.classList.add('img-error');this.dataset.error='true'"></div>` : ''}
     <div class="park-card-content">
       <span class="badge ${PARK_TIER_COLORS[park.tier]} tier-badge">Tier ${park.tier} — ${PARK_TIER_LABELS[park.tier]}</span>
       <h3>${park.name}</h3>
@@ -868,7 +1026,7 @@ function renderWildlifeDetail(el, id) {
     <div class="detail-page fade-in">
       <a href="#wildlife" class="back-link">← Back to Wildlife</a>
       <div class="detail-hero">
-        <img referrerpolicy="strict-origin-when-cross-origin" data-src="${w.image}" alt="${w.name}" onerror="this.parentElement.classList.add('img-error');this.parentElement.dataset.name='${w.name}';this.dataset.error='true'">
+        <img referrerpolicy="strict-origin-when-cross-origin" ${imageAttrs(w.image, '(max-width: 768px) 100vw, 960px', 'high')} ${imageDimensionAttrs(w.image)} alt="${w.name}" onerror="this.parentElement.classList.add('img-error');this.parentElement.dataset.name='${w.name}';this.dataset.error='true'">
       </div>
       <div class="detail-hero-caption">
         <h1>${w.name}</h1>
@@ -940,7 +1098,7 @@ function renderParkDetail(el, id) {
   el.innerHTML = `
     <div class="detail-page fade-in">
       <a href="#parks" class="back-link">← Back to Parks</a>
-      ${media.image ? `<div class="detail-hero"><img referrerpolicy="strict-origin-when-cross-origin" data-src="${media.image}" alt="${park.name}" onerror="this.parentElement.classList.add('img-error');this.parentElement.dataset.name='${park.name}';this.dataset.error='true'"></div>
+      ${media.image ? `<div class="detail-hero"><img referrerpolicy="strict-origin-when-cross-origin" ${imageAttrs(media.image, '(max-width: 768px) 100vw, 960px', 'high')} ${imageDimensionAttrs(media.image)} alt="${park.name}" onerror="this.parentElement.classList.add('img-error');this.parentElement.dataset.name='${park.name}';this.dataset.error='true'"></div>
       ${detailPhotoMeta ? `<p class="detail-photo-meta">${detailPhotoMeta}</p>` : ''}` : ''}
       <h1 style="font-family:var(--font-display);font-size:var(--text-2xl);margin-bottom:var(--space-2)">${park.name}</h1>
       <p style="color:var(--color-text-muted);font-size:var(--text-lg);margin-bottom:var(--space-4)">${park.location} — ${park.distance}</p>
@@ -975,23 +1133,13 @@ function renderParkDetail(el, id) {
 }
 
 function renderParkMap(park) {
-  if (!GOOGLE_MAPS_EMBED_API_KEY) return '';
-  const query = park.placeId
-    ? `place_id:${park.placeId}`
-    : `${park.name}, ${park.location}`;
-  const src = `https://www.google.com/maps/embed/v1/place?key=${GOOGLE_MAPS_EMBED_API_KEY}&q=${encodeURIComponent(query)}`;
+  const query = `${park.name}, ${park.location}, California`;
+  const href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
   return `
     <div class="detail-section park-map-section">
       <h2>Map</h2>
-      <div class="park-map-embed">
-        <iframe
-          title="Map of ${park.name}"
-          loading="lazy"
-          referrerpolicy="no-referrer-when-downgrade"
-          src="${src}"
-          allowfullscreen>
-        </iframe>
-      </div>
+      <p>Open this park in Google Maps without storing or serving a Maps API key from this site.</p>
+      <a class="btn-secondary" href="${href}" target="_blank" rel="noopener noreferrer">Open map</a>
     </div>`;
 }
 
@@ -1320,51 +1468,62 @@ function buildQuizPerformanceMessage(scorePct, averageScore) {
 
 function renderSearch(el) {
   el.innerHTML = `
-    <div class="section-header" style="text-align:center"><h2>Search</h2><p>Find birds, wildlife, and parks</p></div>
-    <div class="search-input-wrap">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input type="search" id="search-input" placeholder="Search species, parks, habitats..." aria-label="Search" oninput="scheduleSearch()" autofocus>
-    </div>
-    <div id="search-results"></div>`;
+    <section class="page-container search-page" aria-labelledby="search-title">
+      <div class="section-header search-header">
+        <h2 id="search-title">Search</h2>
+        <p>Find birds, wildlife, and parks with fast fuzzy matching</p>
+      </div>
+      <div class="search-panel">
+        <div class="search-input-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="search" id="search-input" placeholder="Try hummingbird, humingbird, raptor, oak..." aria-label="Search birds, wildlife, parks, habitats, and traits" oninput="scheduleSearch()" autocomplete="off" autofocus>
+        </div>
+        <div id="search-results" class="search-results" aria-live="polite"><div class="empty-state"><p>Type at least 2 characters to search</p></div></div>
+      </div>
+    </section>`;
+
+  requestAnimationFrame(() => document.getElementById('search-input')?.focus());
 }
 
 window.scheduleSearch = function() {
   if (searchDebounceTimer) window.clearTimeout(searchDebounceTimer);
   searchDebounceTimer = window.setTimeout(() => {
     window.doSearch();
-  }, 120);
+  }, 75);
 };
 
 window.doSearch = function() {
-  const q = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
+  const q = document.getElementById('search-input')?.value || '';
   const results = document.getElementById('search-results');
   if (!results) return;
 
-  if (!q || q.length < 2) {
+  if (normalizeSearchValue(q).length < 2) {
     results.innerHTML = '<div class="empty-state"><p>Type at least 2 characters to search</p></div>';
     return;
   }
 
-  const matchBirds = SEARCH_INDEX.birds.filter((entry) => entry.haystack.includes(q)).map((entry) => entry.item);
-  const matchWildlife = SEARCH_INDEX.wildlife.filter((entry) => entry.haystack.includes(q)).map((entry) => entry.item);
-  const matchParks = SEARCH_INDEX.parks.filter((entry) => entry.haystack.includes(q)).map((entry) => entry.item);
+  const matches = groupSearchResults(searchItems(q));
+  const totalMatches = matches.birds.length + matches.wildlife.length + matches.parks.length;
 
   let html = '';
-  if (matchBirds.length) {
-    html += `<h3 style="font-family:var(--font-display);margin:var(--space-4) 0 var(--space-3);color:var(--color-primary)">Birds (${matchBirds.length})</h3>`;
-    html += `<div class="card-grid">${matchBirds.map(b => birdCard(b)).join('')}</div>`;
+  if (totalMatches) {
+    html += `<p class="search-summary">${totalMatches} result${totalMatches === 1 ? '' : 's'} for <strong>${escapeHtml(q.trim())}</strong></p>`;
   }
-  if (matchWildlife.length) {
-    html += `<h3 style="font-family:var(--font-display);margin:var(--space-6) 0 var(--space-3);color:var(--color-primary)">Wildlife (${matchWildlife.length})</h3>`;
-    html += `<div class="card-grid">${matchWildlife.map(w => wildlifeCard(w)).join('')}</div>`;
+  if (matches.birds.length) {
+    html += `<h3 class="search-results-heading">Birds (${matches.birds.length})</h3>`;
+    html += `<div class="card-grid">${matches.birds.map(b => birdCard(b)).join('')}</div>`;
   }
-  if (matchParks.length) {
-    html += `<h3 style="font-family:var(--font-display);margin:var(--space-6) 0 var(--space-3);color:var(--color-primary)">Parks (${matchParks.length})</h3>`;
-    html += `<div class="card-grid">${matchParks.map(p => parkCard(p)).join('')}</div>`;
+  if (matches.wildlife.length) {
+    html += `<h3 class="search-results-heading">Wildlife (${matches.wildlife.length})</h3>`;
+    html += `<div class="card-grid">${matches.wildlife.map(w => wildlifeCard(w)).join('')}</div>`;
+  }
+  if (matches.parks.length) {
+    html += `<h3 class="search-results-heading">Parks (${matches.parks.length})</h3>`;
+    html += `<div class="card-grid">${matches.parks.map(p => parkCard(p)).join('')}</div>`;
   }
 
   if (!html) {
-    html = '<div class="empty-state"><h3>No results found</h3><p>Try a different search term</p></div>';
+    html = '<div class="empty-state"><h3>No results found</h3><p>Try a species group, habitat, park name, or a shorter search term.</p></div>';
   }
 
   results.innerHTML = html;
@@ -1428,7 +1587,7 @@ function renderAbout(el) {
 // - observe the rest and swap in src when they near the viewport
 // This avoids the current "refresh to see images" behavior while still
 // keeping the page reasonably light.
-const IMG_EAGER_COUNT = 4;
+const IMG_EAGER_COUNT = 0;
 const MAX_CONCURRENT_IMAGE_LOADS = 4;
 
 const imageLoadQueue = [];
@@ -1457,6 +1616,7 @@ function processImageLoadQueue() {
     activeImageLoads += 1;
     img.loading = next.priority === 'high' ? 'eager' : 'lazy';
     try { img.fetchPriority = next.priority; } catch (e) {}
+    if (img.dataset.srcset) img.srcset = img.dataset.srcset;
     img.src = img.dataset.src;
   }
 }
@@ -1528,8 +1688,10 @@ function activateLazyImages() {
     const rect = img.getBoundingClientRect();
     const nearViewport = rect.top < window.innerHeight + 500 && rect.bottom > -500;
 
-    if (index < IMG_EAGER_COUNT || nearViewport) {
+    if (img.dataset.priority === 'high') {
       loadImage(img, 'high');
+    } else if (index < IMG_EAGER_COUNT || nearViewport) {
+      loadImage(img, 'auto');
     } else {
       imgObserver.observe(img);
     }
