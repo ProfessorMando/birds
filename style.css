@@ -612,6 +612,19 @@
   transform: translateY(-50%); color: var(--color-text-muted);
 }
 
+.search-summary {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  margin: calc(-1 * var(--space-4)) auto var(--space-4);
+  max-width: var(--content-default);
+}
+.search-results-heading {
+  color: var(--color-primary);
+  font-family: var(--font-display);
+  margin: var(--space-6) 0 var(--space-3);
+}
+.search-summary + .search-results-heading { margin-top: var(--space-4); }
+
 /* ===== QUIZ ===== */
 .quiz-container {
   max-width: var(--content-narrow); margin: 0 auto;
