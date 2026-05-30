@@ -1147,12 +1147,20 @@ function renderParkDetail(el, id) {
   updateGlobalDetailTracker('park', park.id);
 }
 
+function getParkMapEmbedSrc(park) {
+  if (GOOGLE_MAPS_EMBED_API_KEY) {
+    const apiQuery = park.placeId
+      ? `place_id:${park.placeId}`
+      : `${park.name}, ${park.location}`;
+    return `https://www.google.com/maps/embed/v1/place?key=${encodeURIComponent(GOOGLE_MAPS_EMBED_API_KEY)}&q=${encodeURIComponent(apiQuery)}`;
+  }
+
+  const publicQuery = `${park.name}, ${park.location}, California`;
+  return `https://www.google.com/maps?q=${encodeURIComponent(publicQuery)}&output=embed`;
+}
+
 function renderParkMap(park) {
-  if (!GOOGLE_MAPS_EMBED_API_KEY) return '';
-  const query = park.placeId
-    ? `place_id:${park.placeId}`
-    : `${park.name}, ${park.location}`;
-  const src = `https://www.google.com/maps/embed/v1/place?key=${GOOGLE_MAPS_EMBED_API_KEY}&q=${encodeURIComponent(query)}`;
+  const src = getParkMapEmbedSrc(park);
   return `
     <div class="detail-section park-map-section">
       <h2>Map</h2>

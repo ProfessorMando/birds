@@ -8,7 +8,7 @@ This project expects a Cloudflare Worker environment variable/secret named `g_ma
 
 - The worker script is `worker.js` and serves static assets via the `ASSETS` binding configured in `wrangler.toml`.
 - The key is read at runtime from the `/api/config` route in `worker.js` and consumed by the SPA in `app.js`.
-- In Cloudflare, add `g_map_key` as a Worker secret/variable for this Worker.
+- In Cloudflare, add `g_map_key` as a Worker secret/variable for this Worker. `G_MAP_KEY` is also accepted as a fallback binding name.
 - The asset directory is the repository root, so `.assetsignore` excludes repository metadata and deployment-only files such as `.git`, Wrangler config, local scripts, and the Worker source modules from the static asset upload.
 - Do not commit local API keys, `.dev.vars`, or Cloudflare secret values to this repository.
 

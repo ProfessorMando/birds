@@ -44,7 +44,7 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname === '/api/config') {
-      return withSecurityHeaders(new Response(JSON.stringify({ g_map_key: env.g_map_key || '' }), {
+      return withSecurityHeaders(new Response(JSON.stringify({ g_map_key: env.g_map_key || env.G_MAP_KEY || '' }), {
         headers: {
           'content-type': 'application/json; charset=utf-8',
           'cache-control': 'no-store'
