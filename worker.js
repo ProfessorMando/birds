@@ -16,6 +16,7 @@ const SECURITY_HEADERS = {
     "img-src 'self' data:",
     "font-src 'self'",
     "connect-src 'self'",
+    "frame-src https://www.google.com",
     "object-src 'none'",
     "base-uri 'self'",
     "frame-ancestors 'none'",
@@ -41,6 +42,15 @@ function withSecurityHeaders(response, request) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+
+    if (url.pathname === '/api/config') {
+      return withSecurityHeaders(new Response(JSON.stringify({ g_map_key: env.g_map_key || '' }), {
+        headers: {
+          'content-type': 'application/json; charset=utf-8',
+          'cache-control': 'no-store'
+        }
+      }), request);
+    }
 
     if (
       url.pathname === '/api/detail-open' ||
